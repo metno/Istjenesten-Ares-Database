@@ -53,6 +53,9 @@
     when: postgresql_conf.stat.exists == False
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
+  # Set up PostGIS template database
+  - name: setup postgis
+    include: roles/common/tasks/postgis-setup.yml
 
   - name: add bifrost group
     include: roles/common/tasks/add-bifrost-group.yml
@@ -61,8 +64,6 @@
     include: roles/common/tasks/add-bifrost-admin-user.yml
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
-  - name: setup postgis
-    include: roles/common/tasks/postgis-setup.yml
 
   # - name: add bifrost analyst user
   #   include: roles/common/tasks/add-bifrost-analyst-user.yml

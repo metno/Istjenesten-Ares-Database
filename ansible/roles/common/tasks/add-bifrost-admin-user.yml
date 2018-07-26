@@ -17,7 +17,7 @@
 ---
 - name: add bifrost administrative user
   user: name=bifrostadmin
-        password=$6$LwI.6W2w$HNaqek2MtZkVfmpPwdNu/O1lWPmZPMJJdWqeuTO9jrZ5oBUBnvhMTQ8.ZTg3a73zGEMwYhFwfQNpSbObHN6ev1
+        password=bifrostadmin
         shell=/bin/bash
         groups=bifrost
 
