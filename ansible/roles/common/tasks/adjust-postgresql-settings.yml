@@ -22,7 +22,7 @@
 
 - name: get postgresql version number (for Bionic)
   set_fact:
-    psql_version: '10.4'
+    psql_version: '10'
   when: lubuntu_version == "bionic"
 
 - name: create new postgresql directory
