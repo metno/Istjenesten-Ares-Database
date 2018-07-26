@@ -2,7 +2,7 @@
 # Purpose:       Shell script to run Ansible provisioning on a Istjenesten database master server VM
 # Author(s):     Nick Hughes
 # Created:       2018-vii-25
-# Modifications: 2017-vii-?  - 
+# Modifications: 2018-vii-?  - 
 # Copyright:     (c) Norwegian Meteorological Institute, 2018
 # Citing:        https://doi.org/10.5281/zenodo.xxxxxx
 #

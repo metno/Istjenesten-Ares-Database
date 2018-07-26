@@ -1,8 +1,8 @@
 # Name:          istjenesten_database_server_slave_ansible_provision.sh
 # Purpose:       Shell script to run Ansible provisioning on a Istjenesten database slave server VM
 # Author(s):     Nick Hughes
-# Created:       2018-vii-25
-# Modifications: 2017-vii-?  - 
+# Created:       2018-vii-26
+# Modifications: 2018-vii-?  - 
 # Copyright:     (c) Norwegian Meteorological Institute, 2018
 # Citing:        https://doi.org/10.5281/zenodo.xxxxxx
 #
@@ -33,7 +33,7 @@ fi
 # Get Bifrost git repository onto virtual machine
 mkdir -p /home/vagrant/git/istjenesten-ares-database
 git clone \
-  https://Polarnix@bitbucket.org/Polarnix/istjenesten-ares-database.git \
+  https://Polarnix:gwEm*HJy*5sr@bitbucket.org/Polarnix/istjenesten-ares-database.git \
   /home/vagrant/git/istjenesten-ares-database
 
 # Run Ansible playbook to install Bifrost
@@ -41,5 +41,5 @@ cd /home/vagrant/git/istjenesten-ares-database
 ansible-playbook --inventory="localhost," \
   -v \
   -e lubuntu_version="bionic" \
-  -c local "/home/vagrant/git/istjenesten-ares-database/ansible/istjenesten-database-server.yml"
+  -c local "/home/vagrant/git/istjenesten-ares-database/ansible/istjenesten-database-slave-server.yml"
  
