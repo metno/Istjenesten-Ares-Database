@@ -67,7 +67,7 @@
 
 # Newer versions of Ansible prevent sudo'ing to an unprivileged user. However we must run this command as postgres so
 # do this by putting it into a single system command.  
-- name: initialise database on new directory (on Xenial)
+- name: initialise database on new directory (on Xenial and Bionic)
   command: 'sudo -u postgres /bin/bash -c "/usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres"'
   
 - name: start postgresql service
