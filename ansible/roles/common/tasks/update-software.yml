@@ -15,6 +15,16 @@
 #                but WITHOUT ANY WARRANTY without even the implied warranty of
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---
+
+# Add UbuntuUpdates.org 3rd Party Repository: Postgresql
+- name: add PostgreSQL apt key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+- name: add PostgreSQL repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ lubuntu_version }}-pgdg main' state=present
+
+# Update the cache and then the software
 - name: update apt cache
   apt: update_cache=yes
 - name: update apt software
