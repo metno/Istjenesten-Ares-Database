@@ -1,0 +1,54 @@
+# Name:          add-bifrost-satellite-user.yml
+# Purpose:       Add Bifrost satellite user to the server/client system for satellite data processing.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-26
+# Modifications: 2018-ix-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: add bifrost satellite user
+  user: name=bifrostsat 
+        password=$6$KphQO/tcY$WgQzk51p5vZQrOOfMXyfnElLME4OU0cJSPQ0kEQQUSAR.t05UhJ5Me5QZdMFo4Z9YBlPWqBex/7Qp8Ozu4LV.0
+        shell=/bin/bash
+        groups=bifrost
+
+- name: postgresql check
+  stat: path=/home/postgres/postgresql.conf
+  register: postgresql_exists
+
+- name: add bifrostsat postgresql user
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user:
+    name: "bifrostsat"
+    encrypted: 'yes'
+    password: "md57be031acda7c78253bd487c53e7f0d17"
+    login_user: "postgres"
+    role_attr_flags: "NOCREATEDB,NOSUPERUSER"
+    db: postgres
+  when: postgresql_exists.stat.exists == True
+
+- name: create directory for bifrostsat satellite data files
+  file: path=/home/bifrostsat/Data owner=bifrostsat group=bifrostsat state=directory
+- name: create directory for bifrostsat software logs
+  file: path=/home/bifrostsat/Logs owner=bifrostsat group=bifrostsat state=directory
+- name: create directory for bifrostsat Dropbox files
+  file: path=/home/bifrostsat/Dropbox owner=bifrostsat group=bifrostsat state=directory
+- name: create directory for bifrostsat Dropbox invalid files
+  file: path=/home/bifrostsat/Dropbox/invalid owner=bifrostsat group=bifrostsat state=directory
+- name: create directory for bifrostsat settings files
+  file: path=/home/bifrostsat/Settings owner=bifrostsat group=bifrostsat state=directory
+  
+- name: create directory for bifrostsat temporary files
+  file: path=/home/bifrostsat/tmp owner=bifrostsat group=bifrostsat state=directory

@@ -1,0 +1,43 @@
+# Name:          add-bifrost-analyst-user.yml
+# Purpose:       Add example Bifrost analyst user to the server/client system.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-26
+# Modifications: 2018-ix-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: add bifrost icechart analyst user
+  user: name=bifrostanalyst
+        password=$6$DSHhDfthIiO6gdyw$tihUOxqjFf3lLw.CNUbT6RiyKFSB9r31bnDomS7fmWEiBN2NQ93TiQaMRWoaV2jA9QrAAdE/UDNHuNG2pOwAb1
+        shell=/bin/bash
+        groups=bifrost
+        
+- name: postgresql check
+  stat: path=/home/postgres/postgresql.conf
+  register: postgresql_exists
+
+- name: add bifrostanalyst postgresql user
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user:
+    name: "bifrostanalyst"
+    encrypted: 'yes'
+    password: "md593421a5c591eded66e37602946abf6d5"
+    login_user: "postgres"
+    role_attr_flags: "NOCREATEDB,NOSUPERUSER"
+    db: postgres
+  when: postgresql_exists.stat.exists == True
+        
+
+  
