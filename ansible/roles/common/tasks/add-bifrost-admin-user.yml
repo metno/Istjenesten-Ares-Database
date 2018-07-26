@@ -30,7 +30,7 @@
   become_user: postgres
   vars:
     ansible_ssh_pipelining: true
-    encrypted: yes
+    encrypted: true
   postgresql_user:
     name=bifrostadmin
     password=md58ca2c6b406e9c24dd8b3e18352373e29
