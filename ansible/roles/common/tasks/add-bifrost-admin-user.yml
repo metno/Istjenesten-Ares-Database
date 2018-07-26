@@ -36,8 +36,8 @@
     password: "md59578b7447db61b81a3050a6953f5e931"
     login_user: "postgres"
     role_attr_flags: "CREATEDB,SUPERUSER"
+    db: postgres
   when: postgresql_exists.stat.exists == True
-  # Need to set password, does not seem to have worked here.
 
 - name: create directory for bifrostadmin basic python software
   file: path=/home/bifrostadmin/Python owner=bifrostadmin group=bifrostadmin state=directory
