@@ -23,8 +23,9 @@
                  encoding='UTF-8'
                  template='template_postgis'
                  
-- name: add bifrost admin user role
-  postgresql_user: db=Icecharts name=bifrostadmin password=bifrostadmin priv=ALL
+# - name: add bifrost admin user role
+#   postgresql_user: db=Icecharts name=bifrostadmin password=bifrostadmin priv=ALL
+
 # - name: add bifrost analyst user role
 #   postgresql_user: db=Icecharts name=bifrostanalyst password=bifrostanalyst priv=ALL
 # - name: add bifrost satellite user role
