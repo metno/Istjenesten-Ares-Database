@@ -20,7 +20,7 @@
     psql_version: '9.5'
   when: lubuntu_version == "xenial"
 
-- name: get postgresql version number (for Xenial)
+- name: get postgresql version number (for Bionic)
   set_fact:
     psql_version: '10.4'
   when: lubuntu_version == "bionic"

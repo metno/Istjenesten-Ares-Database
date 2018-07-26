@@ -45,6 +45,9 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
+  - name: see if postgresql directory is already changed
+    stat: path=/home/postgres/postgresql.conf
+    register: postgresql_conf
   # Change postgresql directory if not already done
   - include: roles/common/tasks/adjust-postgresql-settings.yml
     when: postgresql_conf.stat.exists == False
