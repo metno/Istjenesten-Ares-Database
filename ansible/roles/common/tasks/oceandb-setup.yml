@@ -1,0 +1,68 @@
+# Name:          oceandb-setup.yml
+# Purpose:       Create the ocean (coastline, bathymetry and SST processing) database.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-26
+# Modifications: 2018-vii-?  -  
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: create ocean database
+  postgresql_db: name=Ocean
+                 state=present
+                 port=5432
+                 owner=bifrostadmin
+                 encoding='UTF-8'
+                 template='template_postgis'
+                 
+- name: add bifrost admin user role
+  postgresql_user: db=Ocean name=bifrostadmin password=bifrostadmin priv=ALL
+- name: add bifrost analyst user role
+  postgresql_user: db=Ocean name=bifrostanalyst password=bifrostanalyst priv=ALL
+- name: add bifrost satellite user role
+  postgresql_user: db=Ocean name=bifrostsat password=bifrostsat priv=ALL
+  
+- name: remove bifrostanalyst unnecessary privileges
+  postgresql_user: name=bifrostanalyst role_attr_flags=NOSUPERUSER,NOCREATEDB
+- name: remove bifrostsat unnecessary privileges
+  postgresql_user: name=bifrostsat role_attr_flags=NOSUPERUSER,NOCREATEDB
+
+- name: create ocean database tables
+  include: roles/server/tasks/run-sql-script.yml sqlfile={{ item }} dbname=Ocean
+  with_items:
+    - oceandb-sst-processing-setup.sql
+
+# Ocean country table (disabled)
+- name: load thematic mapping country data
+  become: yes
+  become_user: root
+  include: roles/server/tasks/load-thematic-mapping-country.yml
+  
+# Ocean gshhs coastline tables (disabled)
+- name: load gshhs coastline data
+  become: yes
+  become_user: root
+  include: roles/server/tasks/load-gshhs-coastline.yml
+
+# Ocean ADD coastline tables (disabled)
+- name: load scar add data
+  become: yes
+  become_user: root
+  include: roles/server/tasks/load-scar-add-data.yml
+
+# Ocean IBCAO table (disabled)
+- name: load ibcao arctic bathymetry data
+  become: yes
+  become_user: root
+  include: roles/server/tasks/load-ibcao-table.yml
+
+# Ocean GEBCO table (but UK BODC has tricky download procedure)
+    

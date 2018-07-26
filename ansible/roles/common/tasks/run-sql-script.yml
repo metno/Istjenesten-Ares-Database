@@ -16,23 +16,7 @@
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---
 
-# - name: copy template file {{ sqlfile }}
-#   template: src=roles/common/files/database_setup/{{ sqlfile }}
-#             dest=/tmp/{{ sqlfile }}
-
 - name: run template file {{ sqlfile }}
   become: true
   become_user: bifrostadmin
   command: psql -d {{ dbname }} -f roles/common/files/database_setup/{{ sqlfile }}
-
-#   command: psql -d {{ dbname }} -f /tmp/{{ sqlfile }}
-
-# - name: delete template file {{ sqlfile }}
-#   file: path=/tmp/{{ sqlfile }}
-#             state=absent
-
-# In copy and delete template
-#  become: true
-#  become_user: root
-#  become_method: sudo
-            
