@@ -1,0 +1,74 @@
+# Name:          adjust-postgresql-settings.yml
+# Purpose:       Change the location of PostgreSQL database files and user access on the Istjenesten database server system.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-25
+# Modifications: 2018-vii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: get postgresql version number (for Xenial)
+  set_fact:
+    psql_version: '9.5'
+  when: lubuntu_version == "xenial"
+
+- name: get postgresql version number (for Xenial)
+  set_fact:
+    psql_version: '10.4'
+  when: lubuntu_version == "bionic"
+
+- name: create new postgresql directory
+  file: path=/home/postgres owner=postgres state=directory mode="u=rw,g=r,o=r"
+- name: stop postgresql service
+  service: name=postgresql state=stopped
+
+- name: change postgresql file directory value
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp='^data_directory = \'.*\'' 
+           replace='data_directory = \'/home/postgres\''
+           backup=yes
+
+# Change 'listen_addresses' in postgresql.conf
+- name: change postgresql file directory value
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="^#listen_addresses = \'localhost\'" 
+           replace="listen_addresses = \'\*\'"
+           backup=yes
+
+# Append allowed connections to pg_hba.conf
+- name: add comment line
+  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="\n# Allow remote connections for Bifrost"
+
+- name: add private network connection
+  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.168.33.0/24             md5"
+- name: add internal network connection
+  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.0.2.0/24                md5"
+- name: add wifi network connection
+  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             192.168.1.0/24             md5"
+
+# # Allow remote connections for Bifrost
+# host    all             all             10.168.33.0/24             md5
+# host    all             all             10.0.2.0/24                md5
+# host    all             all             192.168.1.0/24             md5
+
+# - name: initialise database on new directory (on Trusty)
+#   sudo: yes
+#   sudo_user: postgres
+#   command: /usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres
+#   when: lubuntu_version == "trusty"
+
+# Newer versions of Ansible prevent sudo'ing to an unprivileged user. However we must run this command as postgres so
+# do this by putting it into a single system command.  
+- name: initialise database on new directory (on Xenial)
+  command: 'sudo -u postgres /bin/bash -c "/usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres"'
+  
+- name: start postgresql service
+  service: name=postgresql state=started

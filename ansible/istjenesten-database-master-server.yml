@@ -1,0 +1,102 @@
+# Name:          istjenesten-database-server.yml
+# Purpose:       Ansible playbook to create Istjenesten database server Vagrant box.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-25
+# Modifications: 2018-vii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  
+  tasks:
+  # - name: display lubuntu version
+  #   debug: msg="{{ lubuntu_version }}"
+    
+  - name: update software
+    include: roles/common/tasks/update-software.yml
+    vars:
+      lubuntu_version: "{{ lubuntu_version }}"
+
+  # Should do a reboot here to finalise updates
+  # See https://www.linux.com/blog/ansible-reboot-server-play-book-and-wait-it-come-back
+  # and https://support.ansible.com/hc/en-us/articles/201958037-Reboot-a-server-and-wait-for-it-to-come-back
+  # - name: Task1 Upgrading 10.04 to 12.04
+  #   shell: do-release-upgrade -f DistUpgradeViewNonInteractive- name: Task2 restart machine after 10.04 to 12.04 upgrade
+  #   shell: reboot
+  #   async: 0
+  #   poll: 0
+  # - name: Task3 waiting for server to come back after 10.04 to 12.04
+  #   local_action: wait_for host={{ ansible_ssh_host }} state=started
+
+  - name: install server packages
+    include: roles/common/tasks/install-common-software.yml  
+    vars:
+      lubuntu_version: "{{ lubuntu_version }}"
+
+  # Change postgresql directory if not already done
+  - include: roles/common/tasks/adjust-postgresql-settings.yml
+    when: postgresql_conf.stat.exists == False
+    vars:
+      lubuntu_version: "{{ lubuntu_version }}"
+
+  - name: add bifrost group
+    include: roles/common/tasks/add-bifrost-group.yml
+    
+  - name: add bifrost admin user
+    include: roles/common/tasks/add-bifrost-admin-user.yml
+    vars:
+      lubuntu_version: "{{ lubuntu_version }}"
+  - name: setup postgis
+    include: roles/common/tasks/postgis-setup.yml
+
+  # - name: add bifrost analyst user
+  #   include: roles/common/tasks/add-bifrost-analyst-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
+
+  # - name: add bifrost satellite user
+  #   include: roles/common/tasks/add-bifrost-satellite-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
+      
+  - name: setup icecharts database
+    become: true
+    become_user: postgres
+    vars:
+      ansible_ssh_pipelining: true
+    include: roles/common/tasks/icechartdb-setup.yml
+
+  # - name: setup ocean database
+  #   become: true
+  #   become_user: postgres
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/server/tasks/oceandb-setup.yml
+
+  # - name: setup satellite database
+  #   become: true
+  #   become_user: postgres
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/server/tasks/satellitedb-setup.yml
+
+  # - name: setup insitu database
+  #   become: true
+  #   become_user: postgres
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/server/tasks/insitudb-setup.yml
+
+              

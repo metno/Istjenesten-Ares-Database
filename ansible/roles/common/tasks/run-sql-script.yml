@@ -1,0 +1,31 @@
+# Name:          run-sql-script.yml
+# Purpose:       Run SQL scripts on database tables.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-25
+# Modifications: 2018-vii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: copy template file {{ sqlfile }}
+  become: true
+  become_user: root
+  become_method: sudo
+  template: src=roles/common/files/database_setup/{{ sqlfile }}
+            dest=/tmp/{{ sqlfile }}
+- name: run template file {{ sqlfile }}
+  command: psql -d {{ dbname }} -f /tmp/{{ sqlfile }}
+- name: delete template file {{ sqlfile }}
+  become: true
+  become_user: root
+  become_method: sudo
+  file: path=/tmp/{{ sqlfile }}
+            state=absent

@@ -1,0 +1,51 @@
+# Name:          add-bifrost-admin-user.yml
+# Purpose:       Add Bifrost administrative user to the server/client system.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-25
+# Modifications: 2018-vii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: add bifrost administrative user
+  user: name=bifrostadmin
+        password=$6$LwI.6W2w$HNaqek2MtZkVfmpPwdNu/O1lWPmZPMJJdWqeuTO9jrZ5oBUBnvhMTQ8.ZTg3a73zGEMwYhFwfQNpSbObHN6ev1
+        shell=/bin/bash
+        groups=bifrost
+
+- name: postgresql check
+  stat: path=/home/postgres/postgresql.conf
+  register: postgresql_exists
+
+- name: add bifrostadmin postgresql user
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user: name=bifrostadmin password=bifrostadmin role_attr_flags=CREATEDB,SUPERUSER
+  when: postgresql_exists.stat.exists == True
+  # Need to set password, does not seem to have worked here.
+
+- name: create directory for bifrostadmin basic python software
+  file: path=/home/bifrostadmin/Python owner=bifrostadmin group=bifrostadmin state=directory
+- name: create directory for bifrostadmin basic script software
+  file: path=/home/bifrostadmin/Scripts owner=bifrostadmin group=bifrostadmin state=directory
+
+- name: create directory for bifrostadmin temporary files
+  file: path=/home/bifrostadmin/tmp owner=bifrostadmin group=bifrostadmin state=directory
+    
+- name: create directory for bifrostadmin settings files
+  file: path=/home/bifrostadmin/Settings owner=bifrostadmin group=bifrostadmin state=directory
+- name: create directory for bifrostadmin settings files
+  file: path=/home/bifrostadmin/Settings/Bifrost owner=bifrostadmin group=bifrostadmin state=directory
+
+- name: create directory for bifrostadmin production archive
+  file: path=/home/bifrostadmin/Production_Archive owner=bifrostadmin group=bifrostadmin state=directory
