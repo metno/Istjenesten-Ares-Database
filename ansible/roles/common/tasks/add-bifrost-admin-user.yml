@@ -31,10 +31,11 @@
   vars:
     ansible_ssh_pipelining: true
   postgresql_user:
-    name=bifrostadmin
-    password="md59578b7447db61b81a3050a6953f5e931 -"
-    role_attr_flags=CREATEDB,SUPERUSER
-    encrypted=yes
+    name: "bifrostadmin"
+    encrypted: 'yes'
+    password: "md59578b7447db61b81a3050a6953f5e931"
+    login_user: "postgres"
+    role_attr_flags: "CREATEDB,SUPERUSER"
   when: postgresql_exists.stat.exists == True
   # Need to set password, does not seem to have worked here.
 
