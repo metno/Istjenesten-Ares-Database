@@ -1,4 +1,4 @@
-# Name:          istjenesten-database-server.yml
+# Name:          istjenesten-database-master-server.yml
 # Purpose:       Ansible playbook to create Istjenesten database server Vagrant box.
 # Author(s):     Nick Hughes
 # Created:       2018-vii-25
@@ -53,6 +53,11 @@
     when: postgresql_conf.stat.exists == False
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
+
+  # Set up pgpool
+  - name: setup pgpool on master server only
+    include: roles/master/tasks/pgpool-setup.yml
+
   # Set up PostGIS template database
   - name: setup postgis
     include: roles/common/tasks/postgis-setup.yml

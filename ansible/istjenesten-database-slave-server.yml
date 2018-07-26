@@ -1,4 +1,4 @@
-# Name:          istjenesten-database-server.yml
+# Name:          istjenesten-database-slave-server.yml
 # Purpose:       Ansible playbook to create Istjenesten database server Vagrant box.
 # Author(s):     Nick Hughes
 # Created:       2018-vii-26
