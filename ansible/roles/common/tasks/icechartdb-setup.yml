@@ -37,8 +37,6 @@
 #   postgresql_user: name=bifrostsat role_attr_flags=NOSUPERUSER,NOCREATEDB
 
 - name: create icecharts database tables
-  become: true
-  become_user: bifrostadmin
   include: roles/common/tasks/run-sql-script.yml sqlfile={{ item }} dbname=Icecharts
   with_items:
     - icechartdb-icechart-polygons-setup.sql
