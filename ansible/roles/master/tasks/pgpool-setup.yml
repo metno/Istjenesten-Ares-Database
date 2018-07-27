@@ -41,7 +41,6 @@
     password: "md53175bce1d3201d16594cebf9d7eb3f9d"
     login_user: "postgres"
     db: postgres
-  when: postgresql_exists.stat.exists == True
 
 # Change pgpool configuration here
 
@@ -120,14 +119,14 @@
 
 # pcp_node_info now works for both postgres and bifrostadmin
 
+# Adjust PostgreSQL pg_hba.conf
+# remove trust/peer entries, all must be md5
+
 # Adjust pool_hba.conf
 # change trust to md5
 
-# Adjust pg_hba.conf
-# Change peer to md5
-
 # Adjust PostgreSQL pg_hba.conf
-# remove trust/peer entries, all must be md5
+# Change peer to md5
 
 # Restart the postgresql and pgpool2 services
 - name: start postgresql service
@@ -135,4 +134,5 @@
 - name: start pgpool2 service
   service: name=pgpool2 state=started
   
-# Connect the slave server  
+# Connect the slave server
+# pcp_attach_node -U postgres -h localhost -p 9898 -n 1  
