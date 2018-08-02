@@ -54,13 +54,13 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
+  # Set up PostGIS template database (do before pgpool
+  - name: setup postgis
+    include: roles/common/tasks/postgis-setup.yml
+
   # Set up pgpool
   - name: setup pgpool on master server only
     include: roles/master/tasks/pgpool-setup.yml
-
-  # Set up PostGIS template database
-  - name: setup postgis
-    include: roles/common/tasks/postgis-setup.yml
 
   - name: add bifrost group
     include: roles/common/tasks/add-bifrost-group.yml
