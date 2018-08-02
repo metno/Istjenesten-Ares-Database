@@ -54,23 +54,23 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
   # Set up PostGIS template database
-  - name: setup postgis
-    include: roles/common/tasks/postgis-setup.yml
+  # - name: setup postgis
+  #   include: roles/common/tasks/postgis-setup.yml
 
-  - name: add bifrost group
-    include: roles/common/tasks/add-bifrost-group.yml
+  # - name: add bifrost group
+  #   include: roles/common/tasks/add-bifrost-group.yml
     
-  - name: add bifrost admin user
-    include: roles/common/tasks/add-bifrost-admin-user.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
+  # - name: add bifrost admin user
+  #   include: roles/common/tasks/add-bifrost-admin-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
 
-  - name: add bifrost analyst user
-    include: roles/common/tasks/add-bifrost-analyst-user.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
+  # - name: add bifrost analyst user
+  #   include: roles/common/tasks/add-bifrost-analyst-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
 
-  - name: add bifrost satellite user
-    include: roles/common/tasks/add-bifrost-satellite-user.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
+  # - name: add bifrost satellite user
+  #   include: roles/common/tasks/add-bifrost-satellite-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
