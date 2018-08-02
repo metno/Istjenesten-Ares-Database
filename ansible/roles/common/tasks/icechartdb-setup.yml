@@ -16,6 +16,8 @@
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---
 - name: create ice charts database
+  become: true
+  become_user: bifrostadmin
   postgresql_db: name=Icecharts
                  state=present
                  port=5433
