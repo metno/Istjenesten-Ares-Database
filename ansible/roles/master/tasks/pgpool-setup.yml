@@ -124,8 +124,15 @@
 
 # Adjust pool_hba.conf
 # change trust to md5
+- name: change trust to md5 in pool_hba.conf
+  shell: "{{ item }}"
+  args:
+    chdir: "/etc/pgpool2"
+  when: lubuntu_version == "xenial"
+  with_items:
+    - /bin/sed --in-place '0,/trust/s/trust/dummy/;s/trust/md5/g;1,/dummy/s/dummy/trust/' pool_hba.conf
 
-# Adjust PostgreSQL pg_hba.conf
+# DO NOT adjust PostgreSQL pg_hba.conf
 # Change peer to md5
 
 # Restart the postgresql and pgpool2 services
@@ -135,4 +142,9 @@
   service: name=pgpool2 state=started
   
 # Connect the slave server
-# pcp_attach_node -U postgres -h localhost -p 9898 -n 1  
+# pcp_attach_node -U postgres -h localhost -p 9898 -n 1
+- name: connect the slave server
+  command: 'pcp_attach_node -U postgres -h localhost -p 9898 -n 1'
+  
+# Check status with 
+# pcp_node_info --verbose -h localhost -U postgres 1
