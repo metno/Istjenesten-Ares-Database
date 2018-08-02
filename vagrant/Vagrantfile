@@ -144,8 +144,8 @@ Vagrant.configure(2) do |config|
     istdbmaster.vm.network "private_network", ip: "10.168.33.10"
     istdbmaster.vm.network "forwarded_port", guest: 5432, host: 54320,
       protocol: "tcp"
-    istdbmaster.vm.network "forwarded_port", guest: 5433, host: 54330,
-      protocol: "tcp"
+    # istdbmaster.vm.network "forwarded_port", guest: 5433, host: 54330,
+    #   protocol: "tcp"
 
     # Provision using Ansible, works on Linux and Mac
     # bifrostsrv.vm.provision "ansible" do |ansible|
