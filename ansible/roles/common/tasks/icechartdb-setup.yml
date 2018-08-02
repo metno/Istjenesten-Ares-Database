@@ -22,6 +22,7 @@
                  state=present
                  port=5433
                  owner=bifrostadmin
+                 login_user="bifrostadmin"
                  login_password="bifrostadmin"
                  encoding='UTF-8'
                  template='template_postgis'
