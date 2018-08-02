@@ -80,12 +80,10 @@
   #   vars:
   #     lubuntu_version: "{{ lubuntu_version }}"
       
-  # - name: setup icecharts database
-  #   become: true
-  #   become_user: postgres
-  #   vars:
-  #     ansible_ssh_pipelining: true
-  #   include: roles/common/tasks/icechartdb-setup.yml
+  - name: setup icecharts database
+    vars:
+      ansible_ssh_pipelining: true
+    include: roles/common/tasks/icechartdb-setup.yml
 
 #  - name: setup ocean database
 #    become: true
