@@ -35,7 +35,7 @@
     encrypted: 'yes'
     password: "md59578b7447db61b81a3050a6953f5e931"
     login_user: "postgres"
-    login_password: "md53175bce1d3201d16594cebf9d7eb3f9d"
+    login_password: "postgres"
     port: 5433
     role_attr_flags: "CREATEDB,SUPERUSER"
     db: postgres
