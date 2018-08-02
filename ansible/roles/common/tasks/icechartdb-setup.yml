@@ -23,7 +23,7 @@
                  port=5433
                  owner=bifrostadmin
                  login_user="bifrostadmin"
-                 login_password="md559872a8893b12b5da9d18c6bf9359233"
+                 login_password="59872a8893b12b5da9d18c6bf9359233"
                  encoding='UTF-8'
                  template='template_postgis'
                  
