@@ -29,7 +29,7 @@
   become_user: postgres
   vars:
     ansible_ssh_pipelining: true
-  command: psql -d template_postgis -c "UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';"
+  command: psql -d template_postgis -p 5433 -c "UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';"
   when: createdb_template_postgis.changed
 
 - name: enable postgis extension 
@@ -37,7 +37,7 @@
   become_user: postgres
   vars:
     ansible_ssh_pipelining: true
-  command: psql -d template_postgis -c "CREATE EXTENSION postgis;"
+  command: psql -d template_postgis -p 5433 -c "CREATE EXTENSION postgis;"
   when: createdb_template_postgis.changed
 
 - name: enable postgis topology extension 
@@ -45,5 +45,5 @@
   become_user: postgres
   vars:
     ansible_ssh_pipelining: true
-  command: psql -d template_postgis -c "CREATE EXTENSION postgis_topology;"
+  command: psql -d template_postgis -p 5433 -c "CREATE EXTENSION postgis_topology;"
   when: createdb_template_postgis.changed

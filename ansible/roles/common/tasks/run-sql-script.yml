@@ -19,4 +19,4 @@
 - name: run template file {{ sqlfile }}
   become: true
   become_user: bifrostadmin
-  command: psql -d {{ dbname }} -f roles/common/files/database_setup/{{ sqlfile }}
+  command: psql -d {{ dbname }} -p 5433 -f roles/common/files/database_setup/{{ sqlfile }}

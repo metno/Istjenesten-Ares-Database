@@ -23,6 +23,7 @@
     - python-psycopg2
     - python-pygresql
     - pgadmin3
+    - python-pexpect
 
 #     - nfs-kernel-server
 #     - daemon
