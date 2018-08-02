@@ -118,10 +118,11 @@
   lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostadmin:md559872a8893b12b5da9d18c6bf9359233"
 
 # Change pool_passwd ownership to postgres:postgres
-- name: Change pool_passwd ownership
-  path: /etc/pgpool2/pool_passwd
-  owner: postgres
-  group: postgres
+- name: change pool_passwd ownership
+  file:
+    path: /etc/pgpool2/pool_passwd
+    owner: postgres
+    group: postgres
 
 # pcp_node_info now works for both postgres and bifrostadmin
 
