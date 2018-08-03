@@ -85,24 +85,24 @@
       ansible_ssh_pipelining: true
     include: roles/common/tasks/icechartdb-setup.yml
 
-#  - name: setup ocean database
-#    become: true
-#    become_user: postgres
-#    vars:
-#      ansible_ssh_pipelining: true
-#    include: roles/server/tasks/oceandb-setup.yml
+  - name: setup ocean database
+    become: true
+    become_user: postgres
+    vars:
+      ansible_ssh_pipelining: true
+    include: roles/server/tasks/oceandb-setup.yml
 
-#  - name: setup satellite database
-#    become: true
-#    become_user: postgres
-#    vars:
-#      ansible_ssh_pipelining: true
-#    include: roles/server/tasks/satellitedb-setup.yml
+  - name: setup satellite database
+    become: true
+    become_user: postgres
+    vars:
+      ansible_ssh_pipelining: true
+    include: roles/server/tasks/satellitedb-setup.yml
 
-#  - name: setup insitu database
-#    become: true
-#    become_user: postgres
-#    vars:
-#      ansible_ssh_pipelining: true
-#    include: roles/server/tasks/insitudb-setup.yml
+  - name: setup insitu database
+    become: true
+    become_user: postgres
+    vars:
+      ansible_ssh_pipelining: true
+    include: roles/server/tasks/insitudb-setup.yml
               
