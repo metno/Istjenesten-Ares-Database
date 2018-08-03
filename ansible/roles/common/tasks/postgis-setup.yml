@@ -30,7 +30,7 @@
   vars:
     ansible_ssh_pipelining: true
   expect:
-    command: psql -d template_postgis -p 5433 -U postgres -c "UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';"
+    command: psql -d template_postgis -p 5432 -U postgres -c "UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';"
     responses:
       (?i)Password: "postgres"
   when: createdb_template_postgis.changed
@@ -41,7 +41,7 @@
   vars:
     ansible_ssh_pipelining: true
   expect:
-    command: psql -d template_postgis -p 5433 -U postgres -c "CREATE EXTENSION postgis;"
+    command: psql -d template_postgis -p 5432 -U postgres -c "CREATE EXTENSION postgis;"
     responses:
       (?i)Password: "postgres"
   when: createdb_template_postgis.changed
@@ -52,7 +52,7 @@
   vars:
     ansible_ssh_pipelining: true
   expect:
-    command: psql -d template_postgis -p 5433 -U postgres -c "CREATE EXTENSION postgis_topology;"
+    command: psql -d template_postgis -p 5432 -U postgres -c "CREATE EXTENSION postgis_topology;"
     responses:
       (?i)Password: "postgres"
   when: createdb_template_postgis.changed
