@@ -58,6 +58,10 @@
   - name: setup postgis
     include: roles/common/tasks/postgis-setup.yml
 
+  # Set the postgres password
+  - name: setup postgres for pgpool
+    include: roles/slave/tasks/set-postgres-password.yml
+
   # - name: add bifrost group
   #   include: roles/common/tasks/add-bifrost-group.yml
     

@@ -54,7 +54,7 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
-  # Set up PostGIS template database (do before pgpool
+  # Set up PostGIS template database (do before pgpool)
   - name: setup postgis
     include: roles/common/tasks/postgis-setup.yml
 
