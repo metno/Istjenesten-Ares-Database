@@ -26,11 +26,12 @@
                  template='template_postgis'
                  
 - name: add bifrost admin user role
-  postgresql_user: db=Ocean name=bifrostadmin password=bifrostadmin priv=ALL
+  postgresql_user: db=Ocean name=bifrostadmin priv=ALL
+  # password="md559872a8893b12b5da9d18c6bf9359233" 
 - name: add bifrost analyst user role
-  postgresql_user: db=Ocean name=bifrostanalyst password=bifrostanalyst priv=ALL
+  postgresql_user: db=Ocean name=bifrostanalyst password="md5a342ac0664424a9c1fb933771d9bd667" priv=ALL
 - name: add bifrost satellite user role
-  postgresql_user: db=Ocean name=bifrostsat password=bifrostsat priv=ALL
+  postgresql_user: db=Ocean name=bifrostsat password="md5461d643ec076cac50fcefd8e27ec30b6" priv=ALL
   
 - name: remove bifrostanalyst unnecessary privileges
   postgresql_user: name=bifrostanalyst role_attr_flags=NOSUPERUSER,NOCREATEDB
