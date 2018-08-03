@@ -113,10 +113,16 @@
 # or
 # postgres:md53175bce1d3201d16594cebf9d7eb3f9d
 # bifrostadmin:md559872a8893b12b5da9d18c6bf9359233
+# bifrostanalyst:md5a342ac0664424a9c1fb933771d9bd667
+# bifrostsat:md5461d643ec076cac50fcefd8e27ec30b6
 - name: add postgres to pool_passwd.conf
   lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="postgres:md53175bce1d3201d16594cebf9d7eb3f9d"
 - name: add bifrostadmin to pool_passwd.conf
   lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostadmin:md559872a8893b12b5da9d18c6bf9359233"
+- name: add bifrostanalyst to pool_passwd.conf
+  lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostanalyst:md5a342ac0664424a9c1fb933771d9bd667"
+- name: add bifrostsat to pool_passwd.conf
+  lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostsat:md5461d643ec076cac50fcefd8e27ec30b6"
 
 # Change pool_passwd ownership to postgres:postgres
 - name: change pool_passwd ownership

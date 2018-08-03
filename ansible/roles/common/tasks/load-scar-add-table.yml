@@ -1,0 +1,26 @@
+# Name:          load-scar-add-table.yml
+# Purpose:       Download SCAR Antarctic Digital Database data.
+# Author(s):     Nick Hughes
+# Created:       2017-ix-4
+# Modifications: 2017-ix-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2017
+# Citing:        https://doi.org/10.5281/zenodo.884048
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- name: download SCAR ADD zip file and unpack
+  become: yes
+  become_user: root
+  unarchive: src={{ url }} dest=/tmp/scar_add copy=no
+  
+- name: copy {{ zipname }} data to Ocean database
+  shell: "export PGPASSWORD='bifrostadmin'; /usr/bin/shp2pgsql -s 3031 -{{ mode }} -W LATIN1 /tmp/scar_add/{{ zipname }}.shp {{ dbtable }} | /usr/bin/psql -h localhost -p 5433 -d Ocean -U bifrostadmin"
+  args:
+    executable: /bin/bash

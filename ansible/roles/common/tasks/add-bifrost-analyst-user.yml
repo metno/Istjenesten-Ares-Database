@@ -33,7 +33,7 @@
   postgresql_user:
     name: "bifrostanalyst"
     encrypted: 'yes'
-    password: "md593421a5c591eded66e37602946abf6d5"
+    password: "md5a342ac0664424a9c1fb933771d9bd667"
     login_user: "postgres"
     login_password: "postgres"
     port: 5433

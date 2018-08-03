@@ -18,8 +18,10 @@
 - name: create insitu database
   postgresql_db: name=Insitu
                  state=present
-                 port=5432
+                 port=5433
                  owner=bifrostadmin
+                 login_user="bifrostadmin"
+                 login_password="bifrostadmin"
                  encoding='UTF-8'
                  template='template_postgis'
                  

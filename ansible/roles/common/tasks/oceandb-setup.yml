@@ -18,8 +18,10 @@
 - name: create ocean database
   postgresql_db: name=Ocean
                  state=present
-                 port=5432
+                 port=5433
                  owner=bifrostadmin
+                 login_user="bifrostadmin"
+                 login_password="bifrostadmin"                 
                  encoding='UTF-8'
                  template='template_postgis'
                  
@@ -36,7 +38,7 @@
   postgresql_user: name=bifrostsat role_attr_flags=NOSUPERUSER,NOCREATEDB
 
 - name: create ocean database tables
-  include: roles/server/tasks/run-sql-script.yml sqlfile={{ item }} dbname=Ocean
+  include: roles/common/tasks/run-sql-script.yml sqlfile={{ item }} dbname=Ocean
   with_items:
     - oceandb-sst-processing-setup.sql
 
@@ -44,25 +46,25 @@
 - name: load thematic mapping country data
   become: yes
   become_user: root
-  include: roles/server/tasks/load-thematic-mapping-country.yml
+  include: roles/common/tasks/load-thematic-mapping-country.yml
   
 # Ocean gshhs coastline tables (disabled)
 - name: load gshhs coastline data
   become: yes
   become_user: root
-  include: roles/server/tasks/load-gshhs-coastline.yml
+  include: roles/common/tasks/load-gshhs-coastline.yml
 
 # Ocean ADD coastline tables (disabled)
 - name: load scar add data
   become: yes
   become_user: root
-  include: roles/server/tasks/load-scar-add-data.yml
+  include: roles/common/tasks/load-scar-add-data.yml
 
 # Ocean IBCAO table (disabled)
 - name: load ibcao arctic bathymetry data
   become: yes
   become_user: root
-  include: roles/server/tasks/load-ibcao-table.yml
+  include: roles/common/tasks/load-ibcao-table.yml
 
 # Ocean GEBCO table (but UK BODC has tricky download procedure)
     
