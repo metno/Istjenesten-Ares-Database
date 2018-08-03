@@ -70,15 +70,15 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
-  # - name: add bifrost analyst user
-  #   include: roles/common/tasks/add-bifrost-analyst-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"
+  - name: add bifrost analyst user
+    include: roles/common/tasks/add-bifrost-analyst-user.yml
+    vars:
+      lubuntu_version: "{{ lubuntu_version }}"
 
-  # - name: add bifrost satellite user
-  #   include: roles/common/tasks/add-bifrost-satellite-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"
+  - name: add bifrost satellite user
+    include: roles/common/tasks/add-bifrost-satellite-user.yml
+    vars:
+      lubuntu_version: "{{ lubuntu_version }}"
       
   - name: setup icecharts database
     vars:

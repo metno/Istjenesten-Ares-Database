@@ -35,9 +35,9 @@
     encrypted: 'yes'
     password: "md593421a5c591eded66e37602946abf6d5"
     login_user: "postgres"
+    login_password: "postgres"
+    port: 5433
     role_attr_flags: "NOCREATEDB,NOSUPERUSER"
     db: postgres
   when: postgresql_exists.stat.exists == True
-        
-
-  
+   
