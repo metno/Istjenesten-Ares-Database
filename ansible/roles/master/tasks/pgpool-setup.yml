@@ -32,9 +32,10 @@
   postgresql_user:
     name: "postgres"
     encrypted: 'yes'
-    password: "md58a9458a9d5be95d157a38fb267fd43f9"
+    password: "md53175bce1d3201d16594cebf9d7eb3f9d"
     login_user: "postgres"
     db: postgres
+# Use echo \"md5`echo -n \"postgrespostgres\" | md5sum`\" to generate password.
 
 # Stop the postgresql and pgpool2 services
 - name: stop pgpool2 service
