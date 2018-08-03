@@ -33,15 +33,14 @@
   postgresql_user:
     name: "bifrostadmin"
     encrypted: 'yes'
-    password: "md59578b7447db61b81a3050a6953f5e931"
+    password: "md559872a8893b12b5da9d18c6bf9359233"
     login_user: "postgres"
     login_password: "postgres"
     port: 5433
     role_attr_flags: "CREATEDB,SUPERUSER"
     db: postgres
   when: postgresql_exists.stat.exists == True
-  #   password: "md59578b7447db61b81a3050a6953f5e931"
-
+  
 - name: create directory for bifrostadmin basic python software
   file: path=/home/bifrostadmin/Python owner=bifrostadmin group=bifrostadmin state=directory
 - name: create directory for bifrostadmin basic script software
