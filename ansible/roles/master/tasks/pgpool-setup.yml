@@ -32,7 +32,7 @@
   postgresql_user:
     name: "postgres"
     encrypted: 'yes'
-    password: "md53175bce1d3201d16594cebf9d7eb3f9d"
+    password: "md58a9458a9d5be95d157a38fb267fd43f9"
     login_user: "postgres"
     db: postgres
 
