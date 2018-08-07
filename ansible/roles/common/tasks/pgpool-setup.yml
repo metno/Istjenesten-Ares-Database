@@ -37,6 +37,32 @@
     db: postgres
 # Use echo \"md5`echo -n \"postgrespostgres\" | md5sum`\" to generate password.
 
+# See https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2 for good example set up
+
+# Create replication role
+- name: add replication postgresql user
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user:
+    name: "replication"
+    encrypted: 'yes'
+    password: "md5dadd2f92cbc8b479ee735c3ae0658326"
+    login_user: "postgres"
+    login_password: "postgres"
+    port: 5433
+    role_attr_flags: "REPLICATION"
+    db: postgres
+    
+# Create /var/lib/postgresql/.pgpass
+# Add line *:*:*:replication:reppassword
+
+# chown postgres:postgres /var/lib/postgresql/.pgpass
+# chmod 0600 /var/lib/postgresql/.pgpass
+
+
+
 # Stop the postgresql and pgpool2 services
 - name: stop pgpool2 service
   service: name=pgpool2 state=stopped
@@ -98,6 +124,20 @@
            regexp='load_balance_mode = off' 
            replace='load_balance_mode = on'
            backup=yes
+           
+# Add AddGeometryColumn to black_function_list fopr load balancing
+# black_function_list = 'nextval,setval,nextval,setval,AddGeometryColumn'
+
+# Online recovery setup
+# recovery_user = 'postgres'
+# recovery_password = 'postgres'
+ 
+
+# health_check_period = 3
+# health_check_user = 'postgres'
+# health_check_password = 'postgres'
+          
+           
            
 # Add lines to pcp.conf
 #  postgres:e8a48653851e28c69d0506508fb27fc5

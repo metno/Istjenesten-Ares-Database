@@ -42,17 +42,49 @@
            regexp="^#listen_addresses = \'localhost\'" 
            replace="listen_addresses = \'\*\'"
            backup=yes
+           
+# Change port to 5433
+- name: change postgresql port value
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="port= 5432" 
+           replace="port = 5433"
+           backup=yes           
 
+# Adjust replication connections to the following
+- name: change postgresql replication comment
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="Allow replication connections from localhost" 
+           replace="Allow replication connections from specified hosts"
+           backup=yes
+# host  replication     replication     10.168.33.10/32          md5
+- name: change postgresql replication line 1
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="local   replication     all                                     peer" 
+           replace="host  replication     replication     10.168.33.10/32          md5"
+           backup=yes
+# host  replication     replication     10.168.33.20/32          md5
+- name: change postgresql replication line 2
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="host    replication     all             127.0.0.1/32            md5" 
+           replace="host  replication     replication     10.168.33.20/32          md5"
+           backup=yes
+# host  all             postgres        10.168.0.0/16            md5
+- name: change postgresql replication line 3
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="host    replication     all             ::1/128                 md5" 
+           replace="host  all             postgres        10.168.0.0/16            md5"
+           backup=yes
+           
 # Append allowed connections to pg_hba.conf
-- name: add comment line
-  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="\n# Allow remote connections for Bifrost"
+# - name: add comment line
+#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="\n# Allow remote connections for Bifrost"
 
-- name: add private network connection
-  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.168.33.0/24             md5"
-- name: add internal network connection
-  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.0.2.0/24                md5"
-- name: add wifi network connection
-  lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             192.168.1.0/24             md5"
+# - name: add private network connection
+#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.168.33.0/24             md5"
+# - name: add internal network connection
+#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.0.2.0/24                md5"
+# - name: add wifi network connection
+#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             192.168.1.0/24             md5"
 
 # # Allow remote connections for Bifrost
 # host    all             all             10.168.33.0/24             md5
