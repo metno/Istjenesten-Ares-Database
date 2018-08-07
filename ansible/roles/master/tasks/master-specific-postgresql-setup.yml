@@ -1,0 +1,7 @@
+
+# SELECT * FROM pg_create_physical_replication_slot('it_rdbms02');
+
+# And change postgresql.conf again to:
+# wal_level = hot_standby
+# max_replication_slots = 3
+# max_wal_senders = 3

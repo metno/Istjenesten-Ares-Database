@@ -1,0 +1,20 @@
+
+# Stop the PostgreSQL server
+
+# Delete the data directory!
+# i.e.
+# sudo -i -u postgres
+# cd /var/lib/postgresql/9.5    # NB: We movedthis earlier!
+# rm -rf main
+# pg_basebackup -v -D main -R -P -h 10.168.33.10 -p 5433 -U replication
+# logout
+
+# Edit the postgresql.conf
+# hot_standby = on
+# hot_standby_feedback = on
+
+# Edit recovery.conf (in the data directory)
+# standby_mode = 'on'
+# primary_slot_name = '10.168.33.20'
+# primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=reppassword'
+# trigger_file = '/etc/postgresql/10/main/im_the_master'
