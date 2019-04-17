@@ -58,9 +58,12 @@
   - name: setup postgis
     include: roles/common/tasks/postgis-setup.yml
 
+  - name: further adjust postgresql before pgpool setup
+    include: roles/master/tasks/master-specific-postgresql-setup.yml
+
   # Set up pgpool
-  - name: setup pgpool 
-    include: roles/common/tasks/pgpool-setup.yml
+  # - name: setup pgpool 
+  #   include: roles/common/tasks/pgpool-setup.yml
 
   - name: add bifrost group
     include: roles/common/tasks/add-bifrost-group.yml
@@ -70,39 +73,39 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
-  - name: add bifrost analyst user
-    include: roles/common/tasks/add-bifrost-analyst-user.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
+  # - name: add bifrost analyst user
+  #   include: roles/common/tasks/add-bifrost-analyst-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
 
-  - name: add bifrost satellite user
-    include: roles/common/tasks/add-bifrost-satellite-user.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
+  # - name: add bifrost satellite user
+  #   include: roles/common/tasks/add-bifrost-satellite-user.yml
+  #   vars:
+  #     lubuntu_version: "{{ lubuntu_version }}"
       
-  - name: setup icecharts database
-    vars:
-      ansible_ssh_pipelining: true
-    include: roles/common/tasks/icechartdb-setup.yml
+  # - name: setup icecharts database
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/common/tasks/icechartdb-setup.yml
 
-  - name: setup ocean database
-    become: true
-    become_user: postgres
-    vars:
-      ansible_ssh_pipelining: true
-    include: roles/common/tasks/oceandb-setup.yml
+  # - name: setup ocean database
+  #   become: true
+  #   become_user: postgres
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/common/tasks/oceandb-setup.yml
 
-  - name: setup satellite database
-    become: true
-    become_user: postgres
-    vars:
-      ansible_ssh_pipelining: true
-    include: roles/common/tasks/satellitedb-setup.yml
+  # - name: setup satellite database
+  #   become: true
+  #   become_user: postgres
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/common/tasks/satellitedb-setup.yml
 
-  - name: setup insitu database
-    become: true
-    become_user: postgres
-    vars:
-      ansible_ssh_pipelining: true
-    include: roles/common/tasks/insitudb-setup.yml
+  # - name: setup insitu database
+  #   become: true
+  #   become_user: postgres
+  #   vars:
+  #     ansible_ssh_pipelining: true
+  #   include: roles/common/tasks/insitudb-setup.yml
               

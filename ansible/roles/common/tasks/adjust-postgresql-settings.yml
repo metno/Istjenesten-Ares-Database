@@ -36,6 +36,50 @@
            replace='data_directory = \'/home/postgres\''
            backup=yes
 
+# Set postgres password!
+- name: set the postgres user password
+  user: name=postgres
+        password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
+
+- name: set the postgres postgresql user password
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user:
+    name: "postgres"
+    encrypted: 'yes'
+    password: "md53175bce1d3201d16594cebf9d7eb3f9d"
+    login_user: "postgres"
+    db: postgres
+# Use echo \"md5`echo -n \"postgrespostgres\" | md5sum`\" to generate password.
+
+# See https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2 for good example set up
+
+# Create replication role
+- name: add replication postgresql user
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  postgresql_user:
+    name: "replication"
+    encrypted: 'yes'
+    password: "md5dadd2f92cbc8b479ee735c3ae0658326"
+    login_user: "postgres"
+    login_password: "postgres"
+    port: 5433
+    role_attr_flags: "REPLICATION"
+    db: postgres
+    
+# Create /var/lib/postgresql/.pgpass
+# Add line *:*:*:replication:reppassword
+
+# chown postgres:postgres /var/lib/postgresql/.pgpass
+# chmod 0600 /var/lib/postgresql/.pgpass
+
+
+
 # Change 'listen_addresses' in postgresql.conf
 - name: change postgresql file directory value
   replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf

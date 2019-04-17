@@ -1,7 +1,50 @@
+# Name:          master-specific-postgresql-setup.yml
+# Purpose:       Set up the pgpool installation.
+# Author(s):     Nick Hughes
+# Created:       2018-viii-07
+# Modifications: 2018-viii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
 
-# SELECT * FROM pg_create_physical_replication_slot('it_rdbms02');
+# Master server specific PostgreSQL settings, see https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2
+
+# Add replication slots
+- name: add replication slots 
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  expect:
+    command: psql -d template_postgis -p 5433 -U postgres -c "SELECT * FROM pg_create_physical_replication_slot('10.168.33.20');"
+    responses:
+      (?i)Password: "postgres"
 
 # And change postgresql.conf again to:
-# wal_level = hot_standby
-# max_replication_slots = 3
-# max_wal_senders = 3
+- name: change wal_level in postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="#wal_level = replica" 
+           replace="wal_level = hot_standby"
+           backup=yes
+
+- name: change max_replication_slots in postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="#max_replication_slots = 10" 
+           replace="max_replication_slots = 3"
+           backup=yes
+           
+- name: change max_replication_slots in postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="#max_wal_senders = 10" 
+           replace="max_wal_senders = 3"
+           backup=yes
+           
