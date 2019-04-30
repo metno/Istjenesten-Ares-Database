@@ -26,12 +26,12 @@
 
   - name: get postgresql version number (for Xenial)
     set_fact:
-      psql_version: '9.5'
+      psql_version_play: '9.5'
     when: lubuntu_version == "xenial"
 
   - name: get postgresql version number (for Bionic)
     set_fact:
-      psql_version: '11'
+      psql_version_play: '11'
     when: lubuntu_version == "bionic"
 
   - name: update software
@@ -63,11 +63,17 @@
     when: postgresql_conf.stat.exists == False
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
-      psql_version: "{{ psql_version }}"
+      psql_version: "{{ psql_version_play }}"
   
   # Set up PostGIS template database
   - name: setup postgis
     include: roles/common/tasks/postgis-setup.yml
+
+
+  - name: further adjust postgresql before pgpool setup
+    include: roles/slave/tasks/slave-specific-postgresql-setup.yml
+    vars:
+      psql_version: "{{ psql_version_play }}"
 
   # Set up pgpool
   - name: setup pgpool 
