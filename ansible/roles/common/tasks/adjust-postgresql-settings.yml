@@ -44,13 +44,13 @@
 - name: change postgresql file directory value
   replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
            regexp="^#listen_addresses = \'localhost\'" 
-           replace="listen_addresses = \'\*\'"
+           replace="listen_addresses = \'*\'"
            backup=yes
            
 # Change port to 5433
 - name: change postgresql port value
   replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="port= 5432" 
+           regexp="port = 5432" 
            replace="port = 5433"
            backup=yes           
 
