@@ -56,25 +56,25 @@
 
 # Adjust replication connections to the following
 - name: change postgresql replication comment
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
            regexp="Allow replication connections from localhost" 
            replace="Allow replication connections from specified hosts"
            backup=yes
 # host  replication     replication     10.168.33.10/32          md5
 - name: change postgresql replication line 1
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
            regexp="local   replication     all                                     peer" 
            replace="host  replication     replication     10.168.33.10/32          md5"
            backup=yes
 # host  replication     replication     10.168.33.20/32          md5
 - name: change postgresql replication line 2
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
            regexp="host    replication     all             127.0.0.1/32            md5" 
            replace="host  replication     replication     10.168.33.20/32          md5"
            backup=yes
 # host  all             postgres        10.168.0.0/16            md5
 - name: change postgresql replication line 3
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
            regexp="host    replication     all             ::1/128                 md5" 
            replace="host  all             postgres        10.168.0.0/16            md5"
            backup=yes
