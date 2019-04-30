@@ -34,9 +34,8 @@ fi
 mkdir -p /home/vagrant/git/istjenesten-ares-database
 git clone \
   https://Polarnix:gwEm*HJy*5sr@bitbucket.org/Polarnix/istjenesten-ares-database.git \
+  --branch first-fixes \
   /home/vagrant/git/istjenesten-ares-database
-
-git checkout first-fixes
 
 # Run Ansible playbook to install Bifrost
 cd /home/vagrant/git/istjenesten-ares-database 
