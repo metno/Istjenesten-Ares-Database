@@ -31,7 +31,7 @@
 
   - name: get postgresql version number (for Bionic)
     set_fact:
-      psql_version: '11'
+      psql_version_play: '11'
     when: lubuntu_version == "bionic"
 
   - name: update software
@@ -63,7 +63,7 @@
     when: postgresql_conf.stat.exists == False
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
-      psql_version: "{{ psql_version }}"
+      psql_version: "{{ psql_version_play }}"
 
   # Set up PostGIS template database (do before pgpool)
   - name: setup postgis
@@ -72,7 +72,7 @@
   - name: further adjust postgresql before pgpool setup
     include: roles/master/tasks/master-specific-postgresql-setup.yml
     vars:
-      psql_version: "{{ psql_version }}"
+      psql_version: "{{ psql_version_play }}"
 
   # Set up pgpool
   # - name: setup pgpool 
