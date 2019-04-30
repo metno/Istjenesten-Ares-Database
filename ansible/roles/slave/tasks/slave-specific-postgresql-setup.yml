@@ -26,12 +26,44 @@
 # pg_basebackup -v -D main -R -P -h 10.168.33.10 -p 5433 -U replication
 # logout
 
+- name: Delete data directory
+  file:
+    path: /home/postgres
+    state: absent
+
+- name: execute base backup
+  become: true
+  become_user: postgres
+  command: 'pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
+
 # Edit the postgresql.conf
-# hot_standby = on
-# hot_standby_feedback = on
+
+# change postgresql.conf hot standby options
+- name: Change hot_standby in postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="^#hot_standby = on" 
+           replace="hot_standby = on"
+           backup=yes
+
+- name: Change hot_standby_feedback in postgresql.conf
+  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
+           regexp="^#hot_standby_feedback = on" 
+           replace="hot_standby_feedback = on"
+           backup=yes
+
 
 # Edit recovery.conf (in the data directory)
 # standby_mode = 'on'
 # primary_slot_name = '10.168.33.20'
 # primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=reppassword'
 # trigger_file = '/etc/postgresql/10/main/im_the_master'
+
+- name: add new configuration "recovery.conf"
+  blockinfile:
+    create: yes
+    dest: /var/lib/pgsql/9.4/data/recovery.conf
+    block: |
+      standby_mode = 'on'
+      primary_slot_name = '10.168.33.20'
+      primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=postgrespostgres'
+      trigger_file = '/etc/postgresql/11/main/im_the_master'
