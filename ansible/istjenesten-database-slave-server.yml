@@ -76,8 +76,8 @@
       psql_version: "{{ psql_version_play }}"
 
   # Set up pgpool
-  - name: setup pgpool 
-    include: roles/common/tasks/pgpool-setup.yml
+  #  - name: setup pgpool 
+  #  include: roles/common/tasks/pgpool-setup.yml
 
   # - name: add bifrost group
   #   include: roles/common/tasks/add-bifrost-group.yml

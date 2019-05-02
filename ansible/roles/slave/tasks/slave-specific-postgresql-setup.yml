@@ -17,6 +17,8 @@
 ---  
 
 # Stop the PostgreSQL server
+- name: stop postgresql service
+  service: name=postgresql state=stopped
 
 # Delete the data directory!
 # i.e.
@@ -31,11 +33,16 @@
     path: /home/postgres
     state: absent
 
+- name: Ansible create file with content example
+  copy:
+    dest: "/var/lib/postgresql/.pgpass"
+    content: |
+      *:*:*:replication:postgres
+
 - name: execute base backup
   become: true
-  become_user: postgres
-  command: 'pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
-
+  become_user: vagrant 
+  command: 'sudo PGPASSFILE=/var/lib/postgresql/.pgpass pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
 # Edit the postgresql.conf
 
 # change postgresql.conf hot standby options
@@ -61,9 +68,14 @@
 - name: add new configuration "recovery.conf"
   blockinfile:
     create: yes
-    dest: /var/lib/pgsql/9.4/data/recovery.conf
+    dest: /var/lib/pgsql/{{ psql_version }}/data/recovery.conf
     block: |
       standby_mode = 'on'
       primary_slot_name = '10.168.33.20'
-      primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=postgrespostgres'
-      trigger_file = '/etc/postgresql/11/main/im_the_master'
+      primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=postgres'
+      trigger_file = '/etc/postgresql/{{ psql_version }}/main/im_the_master'
+
+# restart the PostgreSQL server
+- name: start postgresql service
+  service: name=postgresql state=started
+
