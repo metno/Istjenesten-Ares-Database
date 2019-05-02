@@ -30,18 +30,17 @@
 
 - name: Delete data directory
   file:
-    path: /home/postgres
+    path: "/home/postgres"
     state: absent
 
 - name: Ansible create file with content example
   copy:
     dest: "/var/lib/postgresql/.pgpass"
+    mode: 0600
     content: |
       *:*:*:replication:postgres
 
 - name: execute base backup
-  become: true
-  become_user: vagrant 
   command: 'sudo PGPASSFILE=/var/lib/postgresql/.pgpass pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
 # Edit the postgresql.conf
 
