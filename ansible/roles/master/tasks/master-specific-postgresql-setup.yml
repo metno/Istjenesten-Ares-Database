@@ -19,6 +19,10 @@
 # Master server specific PostgreSQL settings, see https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2
 
 # Add replication slots
+# NB: this will break the build if the replication slot already exists
+# might consider deleting pre-existing on or allowing it to pass if 
+# it already exists, if the build fails because of this just delete
+# /home/postgres and restart
 - name: add replication slots 
   become: true
   become_user: postgres

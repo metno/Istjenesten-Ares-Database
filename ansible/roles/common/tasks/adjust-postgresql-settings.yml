@@ -119,6 +119,7 @@
     encrypted: 'yes'
     password: "md53175bce1d3201d16594cebf9d7eb3f9d"
     login_user: "postgres"
+    port: 5433
     db: postgres
 # Use echo \"md5`echo -n \"postgrespostgres\" | md5sum`\" to generate password.
 
@@ -133,9 +134,10 @@
   postgresql_user:
     name: "replication"
     encrypted: 'yes'
-    password: "md5dadd2f92cbc8b479ee735c3ae0658326"
+    ########### temporary plain text password ########
+    password: "postgres" 
     login_user: "postgres"
     #login_password: "postgres"
-    #port: 5433
+    port: 5433
     role_attr_flags: "REPLICATION"
     db: postgres
