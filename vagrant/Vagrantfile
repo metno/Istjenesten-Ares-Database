@@ -182,7 +182,7 @@ Vagrant.configure(2) do |config|
     istdbslave.vm.hostname = "istdb-slave"
     # istdbslave.vm.synced_folder "/tmp/client/", "/tmp/client", create: true
     istdbslave.vm.network "private_network", ip: "10.168.33.20"
-    istdbmaster.vm.network "forwarded_port", guest: 5432, host: 54320,
+    istdbslave.vm.network "forwarded_port", guest: 5432, host: 54320,
       protocol: "tcp"
     # Provision using Ansible, works on Linux and Mac
     # istdbslave.vm.provision "ansible" do |ansible|
