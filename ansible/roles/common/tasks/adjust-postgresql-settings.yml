@@ -15,8 +15,15 @@
 #                but WITHOUT ANY WARRANTY without even the implied warranty of
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---
+
 - name: create new postgresql directory
-  file: path=/home/postgres owner=postgres state=directory mode="u=rw,g=r,o=r"
+  file:
+    path:  "/home/postgres"
+    owner: postgres
+    group: postgres
+    mode:  0700
+    state: directory
+
 - name: stop postgresql service
   service: name=postgresql state=stopped
 
@@ -105,7 +112,35 @@
 # do this by putting it into a single system command.  
 - name: initialise database on new directory (on Xenial and Bionic)
   command: 'sudo -u postgres /bin/bash -c "/usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres"'
-  
+
+# We change the data directory to /home/postgres/ and our config files remain 
+# in /etc/postgresql/11/main/. However, when we initialise the db we create new
+# config files in /home/postgres/ which are NOT copies of those in 
+# /etc/postgresql/11/main/, weird right? 
+# This is ok until we use pg_basebackup, which takes the config files from 
+# /home/postgres/ on the master and our slave gets screwed. So, here we copy 
+# the config files from /etc/postgresql/11/main/ to /home/postgres/ to make 
+# sure everything matches. This seems to solve the problem, but seems a bit odd.
+
+  #- name: delete old pg_hba.conf
+  #file: 
+  #  path: /home/postgres/pg_hba.conf
+  #  state: absent
+
+- name: copy pg_hba.conf to /home/postgres
+  become: true
+  become_user: postgres
+  copy:
+    src: /etc/postgresql/11/main/pg_hba.conf
+    dest: /home/postgres/pg_hba.conf
+    remote_src: yes
+
+- name: copy postgres.conf to /home/postgres
+  copy:
+    src: /etc/postgresql/11/main/postgresql.conf
+    dest: /home/postgres/postgresql.conf
+    remote_src: yes
+
 - name: start postgresql service
   service: name=postgresql state=started
 

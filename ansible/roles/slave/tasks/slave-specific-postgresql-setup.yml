@@ -33,7 +33,15 @@
     path: "/home/postgres"
     state: absent
 
-- name: Ansible create file with content example
+- name: Recreate data directory with corrected permissions
+  file:
+    path:  "/home/postgres"
+    owner: postgres
+    group: postgres
+    mode:  0700
+    state: directory
+
+- name: Create .pgpass file to be used by pg_basebackup
   copy:
     dest: "/var/lib/postgresql/.pgpass"
     mode: 0600
@@ -42,6 +50,16 @@
 
 - name: execute base backup
   command: 'sudo PGPASSFILE=/var/lib/postgresql/.pgpass pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
+
+- name: set correct permissions for /home/postgres
+  file:
+    path:  "/home/postgres"
+    owner: postgres
+    group: postgres
+    mode:  0700
+    state: directory
+    recurse: True
+
 # Edit the postgresql.conf
 
 # change postgresql.conf hot standby options
@@ -65,14 +83,16 @@
 # trigger_file = '/etc/postgresql/10/main/im_the_master'
 
 - name: add new configuration "recovery.conf"
-  blockinfile:
-    create: yes
-    dest: /var/lib/pgsql/{{ psql_version }}/data/recovery.conf
-    block: |
+  copy:
+    dest: "/home/postgres/recovery.conf"
+    mode: 0600
+    content: |
       standby_mode = 'on'
-      primary_slot_name = '10.168.33.20'
+      primary_slot_name = '10_168_33_20'
       primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=postgres'
       trigger_file = '/etc/postgresql/{{ psql_version }}/main/im_the_master'
+
+
 
 # restart the PostgreSQL server
 - name: start postgresql service
