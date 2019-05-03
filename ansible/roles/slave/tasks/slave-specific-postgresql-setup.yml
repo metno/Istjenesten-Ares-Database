@@ -16,30 +16,6 @@
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---  
 
-# Stop the PostgreSQL server
-- name: stop postgresql service
-  service: name=postgresql state=stopped
-
-# Delete the data directory!
-# i.e.
-# sudo -i -u postgres
-# cd /var/lib/postgresql/9.5    # NB: We movedthis earlier!
-# rm -rf main
-# pg_basebackup -v -D main -R -P -h 10.168.33.10 -p 5433 -U replication
-# logout
-
-- name: Delete data directory
-  file:
-    path: "/home/postgres"
-    state: absent
-
-- name: Recreate data directory with corrected permissions
-  file:
-    path:  "/home/postgres"
-    owner: postgres
-    group: postgres
-    mode:  0700
-    state: directory
 
 - name: Create .pgpass file to be used by pg_basebackup
   copy:
@@ -49,16 +25,7 @@
       *:*:*:replication:postgres
 
 - name: execute base backup
-  command: 'sudo PGPASSFILE=/var/lib/postgresql/.pgpass pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
-
-- name: set correct permissions for /home/postgres
-  file:
-    path:  "/home/postgres"
-    owner: postgres
-    group: postgres
-    mode:  0700
-    state: directory
-    recurse: True
+  command: 'pg_basebackup -v -D /home/postgres -R -P -h 10.168.33.10 -p 5433 -U replication'
 
 # Edit the postgresql.conf
 
@@ -75,13 +42,7 @@
            replace="hot_standby_feedback = on"
            backup=yes
 
-
 # Edit recovery.conf (in the data directory)
-# standby_mode = 'on'
-# primary_slot_name = '10.168.33.20'
-# primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=reppassword'
-# trigger_file = '/etc/postgresql/10/main/im_the_master'
-
 - name: add new configuration "recovery.conf"
   copy:
     dest: "/home/postgres/recovery.conf"
@@ -91,10 +52,4 @@
       primary_slot_name = '10_168_33_20'
       primary_conninfo = 'host=10.168.33.10 port=5433 user=replication password=postgres'
       trigger_file = '/etc/postgresql/{{ psql_version }}/main/im_the_master'
-
-
-
-# restart the PostgreSQL server
-- name: start postgresql service
-  service: name=postgresql state=started
 
