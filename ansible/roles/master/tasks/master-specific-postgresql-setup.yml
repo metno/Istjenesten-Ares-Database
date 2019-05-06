@@ -18,14 +18,98 @@
 
 # Master server specific PostgreSQL settings, see https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2
 
+- name: change postgresql file directory value
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "^data_directory = \'.*\'"
+    replace: "data_directory = \'/home/postgres\'"
+    backup: true
+
+# Set postgres password!
+- name: set the postgres user password
+  user: name=postgres
+        password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
+
+# Change 'listen_addresses' in postgresql.conf
+- name: change postgresql file directory value
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "^#listen_addresses = \'localhost\'"
+    replace: "listen_addresses = \'*\'"
+    backup: true
+
+# Change port to 5433
+- name: change postgresql port value
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "port = 5432"
+    replace: "port = 5433"
+    backup: true
+
+# Adjust replication connections to the following
+- name: change postgresql replication comment
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "Allow replication connections from localhost"
+    replace: "Allow replication connections from specified hosts"
+    backup: true
+         
+# host  replication     replication     10.168.33.10/32          md5
+- name: change postgresql replication line 1
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "local   replication     all                                     peer"
+    replace: "host  replication     replication     10.168.33.10/32          md5"
+    backup: true
+
+# host  replication     replication     10.168.33.20/32          md5
+- name: change postgresql replication line 2
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "host    replication     all             127.0.0.1/32            md5"
+    replace: "host  replication     replication     10.168.33.20/32          md5"
+    backup: true
+
+# host  all             postgres        10.168.0.0/16            md5
+- name: change postgresql replication line 3
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "host    replication     all             ::1/128                 md5"
+    replace: "host  all             postgres        10.168.0.0/16            md5"
+    backup: true
+
+- name: initialise database on new directory (on Xenial and Bionic)
+  command: "/usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres"
+
+# We change the data directory to /home/postgres/ and our config files remain 
+# in /etc/postgresql/11/main/. However, when we initialise the db we create new
+# config files in /home/postgres/ which are NOT copies of those in 
+# /etc/postgresql/11/main/, weird right? 
+# This is ok until we use pg_basebackup, which takes the config files from 
+# /home/postgres/ on the master and our slave gets screwed. So, here we copy 
+# the config files from /etc/postgresql/11/main/ to /home/postgres/ to make 
+# sure everything matches. This seems to solve the problem, but seems a bit odd.
+
+- name: copy pg_hba.conf to /home/postgres
+  become: true
+  become_user: postgres
+  copy:
+    src: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    dest: /home/postgres/pg_hba.conf
+    remote_src: true
+
+- name: copy postgres.conf to /home/postgres
+  copy:
+    src: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    dest: /home/postgres/postgresql.conf
+    remote_src: true
+
 # Add replication slots
 # NB: this will break the build if the replication slot already exists
 # might consider deleting pre-existing on or allowing it to pass if 
 # it already exists, if the build fails because of this just delete
 # /home/postgres and restart
 - name: add replication slots 
-  become: true
-  become_user: postgres
   vars:
     ansible_ssh_pipelining: true
   expect:
@@ -35,20 +119,23 @@
 
 # And change postgresql.conf again to:
 - name: change wal_level in postgresql.conf
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="#wal_level = replica" 
-           replace="wal_level = hot_standby"
-           backup=yes
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "#wal_level = replica" 
+    replace: "wal_level = hot_standby"
+    backup: true
 
 - name: change max_replication_slots in postgresql.conf
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="#max_replication_slots = 10" 
-           replace="max_replication_slots = 3"
-           backup=yes
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "#max_replication_slots = 10" 
+    replace: "max_replication_slots = 3"
+    backup: true
            
 - name: change max_replication_slots in postgresql.conf
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="#max_wal_senders = 10" 
-           replace="max_wal_senders = 3"
-           backup=yes
-           
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "#max_wal_senders = 10" 
+    replace: "max_wal_senders = 3"
+    backup: true
+
