@@ -25,11 +25,6 @@
     replace: "data_directory = \'/home/postgres\'"
     backup: true
 
-# Set postgres password!
-- name: set the postgres user password
-  user: name=postgres
-        password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
-
 # Change 'listen_addresses' in postgresql.conf
 - name: change postgresql file directory value
   replace: 
@@ -103,19 +98,6 @@
     src: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
     dest: /home/postgres/postgresql.conf
     remote_src: true
-
-# Add replication slots
-# NB: this will break the build if the replication slot already exists
-# might consider deleting pre-existing on or allowing it to pass if 
-# it already exists, if the build fails because of this just delete
-# /home/postgres and restart
-- name: add replication slots 
-  vars:
-    ansible_ssh_pipelining: true
-  expect:
-    command: psql -d template_postgis -U postgres -c "SELECT * FROM pg_create_physical_replication_slot('10_168_33_20');"
-    responses:
-      (?i)Password: "postgres"
 
 # And change postgresql.conf again to:
 - name: change wal_level in postgresql.conf

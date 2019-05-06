@@ -42,6 +42,11 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
+  # Set postgres password!
+  - name: set the postgres user password
+    user: name=postgres
+          password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
+
   # stop the PostgreSQL server
   - name: stop postgresql service
     service:
@@ -64,13 +69,12 @@
   - name: setup as the master machine
     become: true
     become_user: postgres
-    include: roles/slave/tasks/master-specific-postgresql-setup.yml
+    include: roles/master/tasks/master-specific-postgresql-setup.yml
     vars:
       psql_version: "{{ psql_version_play }}"
 
   - name: start postgresql service
     service: name=postgresql state=started
-
 
 #  - name: see if postgresql directory is already changed
 #    stat: path=/home/postgres/postgresql.conf
@@ -95,11 +99,16 @@
   # - name: setup pgpool 
   #   include: roles/common/tasks/pgpool-setup.yml
  
-- hosts: all
-  remote_user: postgres
-  become: yes
+#- hosts: all
+#  remote_user: postgres
+#  become: yes
 
-  tasks:
+#  tasks:
+
+  - name: create users
+    become: true
+    become_user: postgres
+    include: roles/master/tasks/create-postgresql-users.yml
 
   - name: add bifrost group
     include: roles/common/tasks/add-bifrost-group.yml
