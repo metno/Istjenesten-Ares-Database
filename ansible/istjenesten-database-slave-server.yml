@@ -54,7 +54,12 @@
     include: roles/common/tasks/install-common-software.yml  
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
- 
+
+  # Set postgres password!
+  - name: set the postgres user password
+    user: name=postgres
+          password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
+
   # stop the PostgreSQL server
   - name: stop postgresql service
     service: 
@@ -73,6 +78,14 @@
       group: postgres
       mode:  0700
       state: directory
+
+  - name: setup postgresql
+    become: true
+    become_user: postgres
+    include: roles/common/tasks/adjust-postgresql-settings.yml 
+    vars:
+      psql_version: "{{ psql_version_play }}"
+
 
   - name: setup as a slave machine
     become: true

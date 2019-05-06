@@ -16,163 +16,57 @@
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---
 
-- name: create new postgresql directory
-  file:
-    path:  "/home/postgres"
-    owner: postgres
-    group: postgres
-    mode:  0700
-    state: directory
-
-- name: stop postgresql service
-  service: name=postgresql state=stopped
-
 - name: change postgresql file directory value
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp='^data_directory = \'.*\'' 
-           replace='data_directory = \'/home/postgres\''
-           backup=yes
-
-# Set postgres password!
-- name: set the postgres user password
-  user: name=postgres
-        password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
-
-   
-# Create /var/lib/postgresql/.pgpass
-# Add line *:*:*:replication:reppassword
-
-# chown postgres:postgres /var/lib/postgresql/.pgpass
-# chmod 0600 /var/lib/postgresql/.pgpass
-
-
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "^data_directory = \'.*\'"
+    replace: "data_directory = \'/home/postgres\'"
+    backup: true
 
 # Change 'listen_addresses' in postgresql.conf
 - name: change postgresql file directory value
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="^#listen_addresses = \'localhost\'" 
-           replace="listen_addresses = \'*\'"
-           backup=yes
-           
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "^#listen_addresses = \'localhost\'"
+    replace: "listen_addresses = \'*\'"
+    backup: true
+
 # Change port to 5433
 - name: change postgresql port value
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="port = 5432" 
-           replace="port = 5433"
-           backup=yes           
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "port = 5432"
+    replace: "port = 5433"
+    backup: true
 
 # Adjust replication connections to the following
 - name: change postgresql replication comment
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
-           regexp="Allow replication connections from localhost" 
-           replace="Allow replication connections from specified hosts"
-           backup=yes
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "Allow replication connections from localhost"
+    replace: "Allow replication connections from specified hosts"
+    backup: true
+
 # host  replication     replication     10.168.33.10/32          md5
 - name: change postgresql replication line 1
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
-           regexp="local   replication     all                                     peer" 
-           replace="host  replication     replication     10.168.33.10/32          md5"
-           backup=yes
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "local   replication     all                                     peer"
+    replace: "host  replication     replication     10.168.33.10/32          md5"
+    backup: true
+
 # host  replication     replication     10.168.33.20/32          md5
 - name: change postgresql replication line 2
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
-           regexp="host    replication     all             127.0.0.1/32            md5" 
-           replace="host  replication     replication     10.168.33.20/32          md5"
-           backup=yes
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "host    replication     all             127.0.0.1/32            md5"
+    replace: "host  replication     replication     10.168.33.20/32          md5"
+    backup: true
+
 # host  all             postgres        10.168.0.0/16            md5
 - name: change postgresql replication line 3
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf
-           regexp="host    replication     all             ::1/128                 md5" 
-           replace="host  all             postgres        10.168.0.0/16            md5"
-           backup=yes
-           
-# Append allowed connections to pg_hba.conf
-# - name: add comment line
-#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="\n# Allow remote connections for Bifrost"
-
-# - name: add private network connection
-#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.168.33.0/24             md5"
-# - name: add internal network connection
-#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             10.0.2.0/24                md5"
-# - name: add wifi network connection
-#   lineinfile: dest=/etc/postgresql/{{ psql_version }}/main/pg_hba.conf insertafter="EOF" line="host    all             all             192.168.1.0/24             md5"
-
-# # Allow remote connections for Bifrost
-# host    all             all             10.168.33.0/24             md5
-# host    all             all             10.0.2.0/24                md5
-# host    all             all             192.168.1.0/24             md5
-
-# - name: initialise database on new directory (on Trusty)
-#   sudo: yes
-#   sudo_user: postgres
-#   command: /usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres
-#   when: lubuntu_version == "trusty"
-
-# Newer versions of Ansible prevent sudo'ing to an unprivileged user. However we must run this command as postgres so
-# do this by putting it into a single system command.  
-- name: initialise database on new directory (on Xenial and Bionic)
-  command: 'sudo -u postgres /bin/bash -c "/usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres"'
-
-# We change the data directory to /home/postgres/ and our config files remain 
-# in /etc/postgresql/11/main/. However, when we initialise the db we create new
-# config files in /home/postgres/ which are NOT copies of those in 
-# /etc/postgresql/11/main/, weird right? 
-# This is ok until we use pg_basebackup, which takes the config files from 
-# /home/postgres/ on the master and our slave gets screwed. So, here we copy 
-# the config files from /etc/postgresql/11/main/ to /home/postgres/ to make 
-# sure everything matches. This seems to solve the problem, but seems a bit odd.
-
-  #- name: delete old pg_hba.conf
-  #file: 
-  #  path: /home/postgres/pg_hba.conf
-  #  state: absent
-
-- name: copy pg_hba.conf to /home/postgres
-  become: true
-  become_user: postgres
-  copy:
-    src: /etc/postgresql/11/main/pg_hba.conf
-    dest: /home/postgres/pg_hba.conf
-    remote_src: yes
-
-- name: copy postgres.conf to /home/postgres
-  copy:
-    src: /etc/postgresql/11/main/postgresql.conf
-    dest: /home/postgres/postgresql.conf
-    remote_src: yes
-
-- name: start postgresql service
-  service: name=postgresql state=started
-
-- name: set the postgres postgresql user password
-  become: true
-  become_user: postgres
-  vars:
-    ansible_ssh_pipelining: true
-  postgresql_user:
-    name: "postgres"
-    encrypted: 'yes'
-    password: "md53175bce1d3201d16594cebf9d7eb3f9d"
-    login_user: "postgres"
-    port: 5433
-    db: postgres
-# Use echo \"md5`echo -n \"postgrespostgres\" | md5sum`\" to generate password.
-
-# See https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2 for good example set up
-
-# Create replication role
-- name: add replication postgresql user
-  become: true
-  become_user: postgres
-  vars:
-    ansible_ssh_pipelining: true
-  postgresql_user:
-    name: "replication"
-    encrypted: 'yes'
-    ########### temporary plain text password ########
-    password: "postgres" 
-    login_user: "postgres"
-    #login_password: "postgres"
-    port: 5433
-    role_attr_flags: "REPLICATION"
-    db: postgres
+  replace:
+    dest: /etc/postgresql/{{ psql_version }}/main/pg_hba.conf
+    regexp: "host    replication     all             ::1/128                 md5"
+    replace: "host  all             postgres        10.168.0.0/16            md5"
+    backup: true
