@@ -17,8 +17,8 @@
 ---
 
 # Defining default values
-trigger_file="/etc/postgresql/9.5/main/im_the_master"
-standby_file="/etc/postgresql/9.5/main/im_slave"
+#trigger_file="/etc/postgresql/9.5/main/im_the_master"
+#standby_file="/etc/postgresql/9.5/main/im_slave"
 
 # stop the PostgreSQL server
 - name: stop postgresql service
@@ -40,13 +40,13 @@ standby_file="/etc/postgresql/9.5/main/im_slave"
 # Deleting trigger file
 - name: Delete trigger file
   file:
-    path: {{ trigger_file }}
+    path: "{{ trigger_file }}"
     state: absent
 
 # Deleting standby file
 - name: Delete standby file
   file:
-    path: {{ standby_file }}
+    path: "{{ standby_file }}"
     state: absent
 
 # Deleting primary info file
