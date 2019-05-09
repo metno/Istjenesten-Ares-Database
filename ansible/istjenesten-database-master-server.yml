@@ -66,6 +66,13 @@
       mode:  0700
       state: directory
 
+  - name: setup postgresql
+    become: true
+    become_user: postgres
+    include: roles/common/tasks/adjust-postgresql-settings.yml
+    vars:
+      psql_version: "{{ psql_version_play }}"
+
   - name: setup as the master machine
     become: true
     become_user: postgres
