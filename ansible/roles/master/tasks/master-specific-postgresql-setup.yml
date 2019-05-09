@@ -28,7 +28,7 @@
 # This is ok until we use pg_basebackup, which takes the config files from 
 # /home/postgres/ on the master and our slave gets screwed. So, here we copy 
 # the config files from /etc/postgresql/11/main/ to /home/postgres/ to make 
-# sure everything matches. This seems to solve the problem, but seems a bit odd.
+# sure everything matches. This seems to solve the problem, but seems a bit hacky.
 
 - name: copy pg_hba.conf to /home/postgres
   become: true

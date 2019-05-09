@@ -17,12 +17,10 @@
 ---
 - hosts: all
   remote_user: vagrant
-  become: yes
+  become: true
   become_method: sudo
   
   tasks:
-  # - name: display lubuntu version
-  #   debug: msg="{{ lubuntu_version }}"
 
   - name: get postgresql version number (for Xenial)
     set_fact:
@@ -39,17 +37,6 @@
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
 
-  # Should do a reboot here to finalise updates
-  # See https://www.linux.com/blog/ansible-reboot-server-play-book-and-wait-it-come-back
-  # and https://support.ansible.com/hc/en-us/articles/201958037-Reboot-a-server-and-wait-for-it-to-come-back
-  # - name: Task1 Upgrading 10.04 to 12.04
-  #   shell: do-release-upgrade -f DistUpgradeViewNonInteractive- name: Task2 restart machine after 10.04 to 12.04 upgrade
-  #   shell: reboot
-  #   async: 0
-  #   poll: 0
-  # - name: Task3 waiting for server to come back after 10.04 to 12.04
-  #   local_action: wait_for host={{ ansible_ssh_host }} state=started
-
   - name: install common packages
     include: roles/common/tasks/install-common-software.yml  
     vars:
@@ -60,13 +47,13 @@
     user: name=postgres
           password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
 
-  # stop the PostgreSQL server
+  # ensure the PostgreSQL server is stopped
   - name: stop postgresql service
     service: 
       name: postgresql 
       state: stopped
 
-  - name: Delete data directory
+  - name: Clean the data directory
     file:
       path: "/home/postgres"
       state: absent
@@ -86,7 +73,6 @@
     vars:
       psql_version: "{{ psql_version_play }}"
 
-
   - name: setup as a slave machine
     become: true
     become_user: postgres
@@ -100,30 +86,3 @@
       name: postgresql 
       state: started
 
-
-#  # Set up PostGIS template database
-#  - name: setup postgis
-#    include: roles/common/tasks/postgis-setup.yml
-
-
-  # Set up pgpool
-  #  - name: setup pgpool 
-  #  include: roles/common/tasks/pgpool-setup.yml
-
-  # - name: add bifrost group
-  #   include: roles/common/tasks/add-bifrost-group.yml
-    
-  # - name: add bifrost admin user
-  #   include: roles/common/tasks/add-bifrost-admin-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"
-
-  # - name: add bifrost analyst user
-  #   include: roles/common/tasks/add-bifrost-analyst-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"
-
-  # - name: add bifrost satellite user
-  #   include: roles/common/tasks/add-bifrost-satellite-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"

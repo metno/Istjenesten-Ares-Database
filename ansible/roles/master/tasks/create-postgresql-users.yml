@@ -16,7 +16,6 @@
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---
 
-
 # Create postgres user and set password
 - name: set the postgres postgresql user password
   vars:
@@ -45,7 +44,7 @@
     role_attr_flags: 'REPLICATION'
     db: postgres
 
- # Add replication slots
+# Add replication slots
 # NB: this will break the build if the replication slot already exists
 # might consider deleting pre-existing on or allowing it to pass if
 # it already exists, if the build fails because of this just delete

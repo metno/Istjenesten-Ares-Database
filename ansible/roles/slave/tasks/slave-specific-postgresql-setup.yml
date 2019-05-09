@@ -16,7 +16,6 @@
 #                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ---  
 
-
 - name: Create .pgpass file to be used by pg_basebackup
   copy:
     dest: "/var/lib/postgresql/.pgpass"

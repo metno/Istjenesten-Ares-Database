@@ -47,13 +47,13 @@
     user: name=postgres
           password=$6$ae8lSquagj5V$3YJY0OL2Lozi8uBxEJJ2yh9Qbwbv/eKbBiPDLaGP0xNF242o59Z/teJR62j.RXYKIk8.JQnDV6j4YD5IBiyWB/
 
-  # stop the PostgreSQL server
+  # ensure the PostgreSQL server is stopped
   - name: stop postgresql service
     service:
       name: postgresql
       state: stopped
 
-  - name: Delete data directory
+  - name: Clean the data directory
     file:
       path: "/home/postgres"
       state: absent
@@ -81,37 +81,15 @@
       psql_version: "{{ psql_version_play }}"
 
   - name: start postgresql service
-    service: name=postgresql state=started
-
-#  - name: see if postgresql directory is already changed
-#    stat: path=/home/postgres/postgresql.conf
-#    register: postgresql_conf
-#  # Change postgresql directory if not already done
-#  - include: roles/common/tasks/adjust-postgresql-settings.yml
-#    when: postgresql_conf.stat.exists == False
-#    vars:
-#      lubuntu_version: "{{ lubuntu_version }}"
-#      psql_version: "{{ psql_version_play }}"
+    service: 
+      name: postgresql 
+      state: started
 
   # Set up PostGIS template database (do before pgpool)
   - name: setup postgis
     include: roles/common/tasks/postgis-setup.yml
 
-#  - name: further adjust postgresql before pgpool setup
-#    include: roles/master/tasks/master-specific-postgresql-setup.yml
-#    vars:
-#      psql_version: "{{ psql_version_play }}"
-
-  # Set up pgpool
-  # - name: setup pgpool 
-  #   include: roles/common/tasks/pgpool-setup.yml
- 
-#- hosts: all
-#  remote_user: postgres
-#  become: yes
-
-#  tasks:
-
+  # Do some more specific user setup (useful to see everything is working)
   - name: create users
     become: true
     become_user: postgres
@@ -120,47 +98,8 @@
   - name: add bifrost group
     include: roles/common/tasks/add-bifrost-group.yml
 
-  - name: add bifrost group
-    include: roles/common/tasks/add-bifrost-group.yml
-    
   - name: add bifrost admin user
     include: roles/common/tasks/add-bifrost-admin-user.yml
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
-
-  # - name: add bifrost analyst user
-  #   include: roles/common/tasks/add-bifrost-analyst-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"
-
-  # - name: add bifrost satellite user
-  #   include: roles/common/tasks/add-bifrost-satellite-user.yml
-  #   vars:
-  #     lubuntu_version: "{{ lubuntu_version }}"
-      
-  # - name: setup icecharts database
-  #   vars:
-  #     ansible_ssh_pipelining: true
-  #   include: roles/common/tasks/icechartdb-setup.yml
-
-  # - name: setup ocean database
-  #   become: true
-  #   become_user: postgres
-  #   vars:
-  #     ansible_ssh_pipelining: true
-  #   include: roles/common/tasks/oceandb-setup.yml
-
-  # - name: setup satellite database
-  #   become: true
-  #   become_user: postgres
-  #   vars:
-  #     ansible_ssh_pipelining: true
-  #   include: roles/common/tasks/satellitedb-setup.yml
-
-  # - name: setup insitu database
-  #   become: true
-  #   become_user: postgres
-  #   vars:
-  #     ansible_ssh_pipelining: true
-  #   include: roles/common/tasks/insitudb-setup.yml
-              
+ 
