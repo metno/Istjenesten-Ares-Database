@@ -30,16 +30,18 @@
 
 # change postgresql.conf hot standby options
 - name: Change hot_standby in postgresql.conf
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="^#hot_standby = on" 
-           replace="hot_standby = on"
-           backup=yes
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "^#hot_standby = on" 
+    replace: "hot_standby = on"
+    backup: true
 
 - name: Change hot_standby_feedback in postgresql.conf
-  replace: dest=/etc/postgresql/{{ psql_version }}/main/postgresql.conf
-           regexp="^#hot_standby_feedback = on" 
-           replace="hot_standby_feedback = on"
-           backup=yes
+  replace: 
+    dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+    regexp: "^#hot_standby_feedback = on" 
+    replace: "hot_standby_feedback = on"
+    backup: true
 
 # Edit recovery.conf (in the data directory)
 - name: add new configuration "recovery.conf"
