@@ -1,0 +1,6 @@
+trigger_file: "/etc/postgresql/11/main/im_the_master"
+standby_file: "/etc/postgresql/11/main/im_the_slave"
+
+master_ip: 10.168.33.10
+slave_ip: 10.168.33.20
+

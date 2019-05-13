@@ -1,0 +1,38 @@
+---
+
+- name: check for master
+  stat:
+    path: "{{ trigger_file }}"
+  register: im_the_master
+
+- name: set is_master to true if trigger file exists
+  set_fact:
+    is_master: true
+  when: im_the_master.stat.exists
+
+- name: otherwise set to false
+  set_fact:
+    is_master: false
+  when: not im_the_master.stat.exists
+
+- name: check for slave
+  stat:
+    path: "{{ standby_file }}"
+  register: im_the_slave
+
+- name: set is_slave to true if standby file exists
+  set_fact:
+    is_slave: true
+  when: im_the_slave.stat.exists
+
+- name: otherwise set to false
+  set_fact:
+    is_slave: false
+  when: not im_the_slave.stat.exists
+
+- name: set postgres version
+  set_fact:
+    psql_version: 11
+  when: version is not defined
+
+

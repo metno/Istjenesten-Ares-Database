@@ -1,0 +1,86 @@
+# Name:          istjenesten-database-slave-server.yml
+# Purpose:       Ansible playbook to create Istjenesten database server Vagrant box.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-26
+# Modifications: 2018-vii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---
+- hosts: localhost 
+  remote_user: vagrant
+  become: true
+  become_method: sudo
+  
+  tasks:
+
+    - name: load variables
+      include_vars: roles/common/vars/vars.yml
+
+    - name: set facts
+      include: roles/common/tasks/set_facts.yml
+
+    - name: fail if server is slave
+      fail:
+        msg: "ERROR: Cannot promote server that contains standby file: {{standby_file}}"
+      when: is_slave == true
+
+      # this could be changed to automatically create trigger file
+    - name: Check for trigger file
+      fail: 
+        msg: "ERROR: Cannot promote server that does not contain trigger file: {{trigger_file}}"
+      when: is_master == false
+
+    # Disabling postgresql on remote host:
+    - name: demote other host if address specified
+      command: "ssh -T vagrant@{{ demote_host }} ansible-playbook /home/vagrant/git/istjenesten-ares-database/ansible/disable_postgresql.yml"
+      when: demote_host is defined
+
+    # stop the PostgreSQL server
+    - name: stop postgresql service
+      service:
+        name: postgresql
+        state: stopped
+
+    ### Undo slave
+
+    - name:
+      file:
+        path: "/home/postgres/recovery.conf"
+        state: absent
+
+    - name: turn off hot standby in postgresql.conf
+      replace: 
+        dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+        regexp: "^hot_standby = on" 
+        replace: "#hot_standby = on"
+        backup: true
+
+    - name: turn off hot_standby_feedback in postgresql.conf
+      replace: 
+        dest: /etc/postgresql/{{ psql_version }}/main/postgresql.conf
+        regexp: "^hot_standby_feedback = on" 
+        replace: "#hot_standby_feedback = on"
+        backup: true
+
+    # turn into master
+    - name: setup as master
+      become: true
+      become_user: postgres
+      include: roles/master/tasks/master-specific-postgresql-setup.yml
+
+
+    # start the PostgreSQL server
+    - name: start postgresql service
+      service:
+        name: postgresql
+        state: started
+
