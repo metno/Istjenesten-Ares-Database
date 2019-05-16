@@ -34,7 +34,7 @@ fi
 mkdir -p /home/vagrant/git/istjenesten-ares-database
 git clone \
   https://github.com/metno/Istjenesten-Ares-Database.git \
-  --branch first-fixes \
+  --branch alistair-dev \
   /home/vagrant/git/istjenesten-ares-database
 
 # Run Ansible playbook to install Bifrost
