@@ -18,14 +18,14 @@
 
 # Master server specific PostgreSQL settings, see https://www.fatdragon.me/blog/2016/05/postgresql-ha-pgpool-ii-part-2
 
-- name: check for /home/postgres
+- name: check for /home/postgres/postgresql.conf
   stat:
-    path: "/home/postgres"
-  register: home_data_folder
+    path: "/home/postgres/postgresql.conf"
+  register: postgresql_configured
 
 - name: initialise database on new directory (on Xenial and Bionic)
   command: "/usr/lib/postgresql/{{ psql_version }}/bin/initdb -D /home/postgres"
-  when: not home_data_folder.stat.exists
+  when: not postgresql_configured.stat.exists
 
 # We change the data directory to /home/postgres/ and our config files remain 
 # in /etc/postgresql/11/main/. However, when we initialise the db we create new
