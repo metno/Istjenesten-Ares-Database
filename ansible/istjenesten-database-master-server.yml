@@ -95,6 +95,10 @@
     become_user: postgres
     include: roles/master/tasks/create-postgresql-users.yml
 
+  #setup pgpool
+  - name: setup pgpool
+    include: roles/common/tasks/pgpool-setup.yml
+
   - name: add bifrost group
     include: roles/common/tasks/add-bifrost-group.yml
 
@@ -102,4 +106,5 @@
     include: roles/common/tasks/add-bifrost-admin-user.yml
     vars:
       lubuntu_version: "{{ lubuntu_version }}"
+
  

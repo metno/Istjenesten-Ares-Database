@@ -156,11 +156,11 @@
   
 # Connect the slave server
 # pcp_attach_node -U postgres -h localhost -p 9898 -n 1
-- name: connect the slave server
-  expect:
-    command: '/usr/sbin/pcp_attach_node -U postgres -h localhost -p 9898 -n 1'
-    responses:
-      (?i)Password: "postgres"
+#- name: connect the slave server
+#  expect:
+#    command: '/usr/sbin/pcp_attach_node -U postgres -h localhost -p 9898 -n 1'
+#    responses:
+#      (?i)Password: "postgres"
   
 # Check status with 
 # /usr/sbin/pcp_node_info --verbose -h localhost -U postgres 1
