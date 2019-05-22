@@ -1,0 +1,166 @@
+# Name:          pgpool-setup.yml
+# Purpose:       Set up the pgpool installation.
+# Author(s):     Nick Hughes
+# Created:       2018-vii-26
+# Modifications: 2018-vii-?  - 
+# Copyright:     (c) Norwegian Meteorological Institute, 2018
+# Citing:        https://doi.org/10.5281/zenodo.xxxxxx
+#
+# License:       This file is part of the BIFROST ice charting system.
+#                BIFROST is free software: you can redistribute it and/or modify
+#                it under the terms of the GNU General Public License as published by
+#                the Free Software Foundation, version 3 of the License.
+#                http://www.gnu.org/licenses/gpl-3.0.html
+#                This program is distributed in the hope that it will be useful,
+#                but WITHOUT ANY WARRANTY without even the implied warranty of
+#                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+---  
+# Install pgpool2
+- name: install pgpool packages from apt
+  apt: 
+    name: "postgresql-{{ psql_version }}-pgpool2" 
+    state: present
+
+
+
+# Stop the postgresql and pgpool2 services
+- name: stop pgpool2 service
+  service: name=pgpool2 state=stopped
+- name: stop postgresql service
+  service: name=postgresql state=stopped
+
+# Change pgpool configuration here
+
+- name: change postgresql data directory value
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='^data_directory = \'.*\'' 
+           replace='data_directory = \'/home/postgres\''
+           backup=yes
+
+- name: activate backend_hostname1 and set value
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='#backend_hostname1 = \'.*\'' 
+           replace='backend_hostname1 = \'10.168.33.20\''
+           backup=yes
+
+- name: activate backend_port1 and set value
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='#backend_port1 = 5433' 
+           replace='backend_port1 = 5432'
+           backup=yes
+
+- name: activate backend_weight1 and set value
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='#backend_weight1 = 1' 
+           replace='backend_weight1 = 1'
+           backup=yes
+
+- name: activate backend_data_directory1 and set value
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='#backend_data_directory1 = \'.*\'' 
+           replace='backend_data_directory1 = \'/home/postgres\''
+           backup=yes
+
+- name: activate backend_flag1 and set value
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='#backend_flag1 = \'.*\'' 
+           replace='backend_flag1 = \'ALLOW_TO_FAILOVER\''
+           backup=yes
+
+- name: enable pool hba
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='enable_pool_hba = off' 
+           replace='enable_pool_hba = on'
+           backup=yes
+
+- name: enable replication mode
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='replication_mode = off' 
+           replace='replication_mode = on'
+           backup=yes
+
+- name: enable load balance mode
+  replace: dest=/etc/pgpool2/pgpool.conf
+           regexp='load_balance_mode = off' 
+           replace='load_balance_mode = on'
+           backup=yes
+           
+# Add AddGeometryColumn to black_function_list fopr load balancing
+# black_function_list = 'nextval,setval,nextval,setval,AddGeometryColumn'
+
+# Online recovery setup
+# recovery_user = 'postgres'
+# recovery_password = 'postgres'
+ 
+
+# health_check_period = 3
+# health_check_user = 'postgres'
+# health_check_password = 'postgres'
+          
+           
+           
+# Add lines to pcp.conf
+#  postgres:e8a48653851e28c69d0506508fb27fc5
+#  bifrostadmin:8ca2c6b406e9c24dd8b3e18352373e29
+- name: add postgres to pcp.conf
+  lineinfile: dest=/etc/pgpool2/pcp.conf insertafter="EOF" line="postgres:e8a48653851e28c69d0506508fb27fc5"
+- name: add bifrostadmin to pcp.conf
+  lineinfile: dest=/etc/pgpool2/pcp.conf insertafter="EOF" line="bifrostadmin:8ca2c6b406e9c24dd8b3e18352373e29"
+
+# Add passwords to pool_passwd (as root)
+# pg_md5 --md5auth --username postgres -p       
+# pg_md5 --md5auth --username bifrostadmin -p
+# or
+# postgres:md53175bce1d3201d16594cebf9d7eb3f9d
+# bifrostadmin:md559872a8893b12b5da9d18c6bf9359233
+# bifrostanalyst:md5a342ac0664424a9c1fb933771d9bd667
+# bifrostsat:md5461d643ec076cac50fcefd8e27ec30b6
+- name: add postgres to pool_passwd.conf
+  lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="postgres:md53175bce1d3201d16594cebf9d7eb3f9d"
+- name: add bifrostadmin to pool_passwd.conf
+  lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostadmin:md559872a8893b12b5da9d18c6bf9359233"
+- name: add bifrostanalyst to pool_passwd.conf
+  lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostanalyst:md5a342ac0664424a9c1fb933771d9bd667"
+- name: add bifrostsat to pool_passwd.conf
+  lineinfile: dest=/etc/pgpool2/pool_passwd insertafter="EOF" line="bifrostsat:md5461d643ec076cac50fcefd8e27ec30b6"
+
+# Change pool_passwd ownership to postgres:postgres
+- name: change pool_passwd ownership
+  file:
+    path: /etc/pgpool2/pool_passwd
+    owner: postgres
+    group: postgres
+
+# pcp_node_info now works for both postgres and bifrostadmin
+
+# Adjust PostgreSQL pg_hba.conf
+# remove trust/peer entries, all must be md5
+
+# Adjust pool_hba.conf
+# change trust to md5
+- name: change trust to md5 in pool_hba.conf
+  shell: "{{ item }}"
+  args:
+    chdir: "/etc/pgpool2"
+  with_items:
+    - /bin/sed --in-place '0,/trust/s/trust/dummy/;s/trust/md5/g;1,/dummy/s/dummy/trust/' pool_hba.conf
+
+# DO NOT adjust PostgreSQL pg_hba.conf
+# Change peer to md5
+
+# Restart the postgresql and pgpool2 services
+- name: start postgresql service
+  service: name=postgresql state=started
+- name: start pgpool2 service
+  service: name=pgpool2 state=started
+  
+# Connect the slave server
+# pcp_attach_node -U postgres -h localhost -p 9898 -n 1
+- name: connect the slave server
+  expect:
+    command: '/usr/sbin/pcp_attach_node -U postgres -h localhost -p 9898 -n 1'
+    responses:
+      (?i)Password: "postgres"
+  
+# Check status with 
+# /usr/sbin/pcp_node_info --verbose -h localhost -U postgres 1
