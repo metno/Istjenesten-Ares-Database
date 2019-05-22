@@ -28,19 +28,35 @@
     - name: set facts
       include: roles/common/tasks/set_facts.yml
 
+    - name: del force to false if undefined
+      set_fact:
+        force: false
+      when: force is not defined
+
     - name: fail if server is slave
       fail:
         msg: "ERROR: Cannot promote server that contains standby file: {{standby_file}}"
-      when: is_slave == true
+      when: is_slave == true and force == false
 
       # this could be changed to automatically create trigger file
     - name: Check for trigger file
       fail: 
         msg: "ERROR: Cannot promote server that does not contain trigger file: {{trigger_file}}"
-      when: is_master == false
+      when: is_master == false and force == false
+
+    - name: print
+      debug: "{{ demote_host }}"
+
+    - name: get user
+      become: false
+      local_action: command whoami
+      register: username_on_host
+
+    - debug: var=username_on_host  
 
     # Disabling postgresql on remote host:
     - name: demote other host if address specified
+      become: false
       command: "ssh -T vagrant@{{ demote_host }} ansible-playbook /home/vagrant/git/istjenesten-ares-database/ansible/disable_postgresql.yml"
       when: demote_host is defined
 
