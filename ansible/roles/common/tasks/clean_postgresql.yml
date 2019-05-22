@@ -18,13 +18,13 @@
 
 # Moving postgresql.conf file in order to prevent service to be started
 - name: Move postgresql.conf to prevent restart
-  command: "mv /etc/postgresql/{{ postgres_version }}/main/postgresql.conf /etc/postgresql/{{ postgres_version }}/main/postgresql.conf.disabled"
+  command: "mv /etc/postgresql/{{ psql_version }}/main/postgresql.conf /etc/postgresql/{{ psql_version }}/main/postgresql.conf.disabled"
 
 
 # Deleting recovery.conf file
 - name: Delete recovery.conf file
   file:
-    path: "/etc/postgresql/{{ postgres_version }}/main/recovery.conf"
+    path: "/etc/postgresql/{{ psql_version }}/main/recovery.conf"
     state: absent
   
 # Deleting trigger file
@@ -42,6 +42,6 @@
 # Deleting primary info file
 - name: Delete primary info file
   file:
-    path: "/var/lib/postgresql/{{ postgres_version }}/main/primary_info"
+    path: "/var/lib/postgresql/{{ psql_version }}/main/primary_info"
     state: absent
 
