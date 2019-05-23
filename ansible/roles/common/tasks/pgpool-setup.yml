@@ -17,11 +17,15 @@
 ---  
 # Install pgpool2
 - name: install pgpool packages from apt
-  apt: 
-    name: "postgresql-{{ psql_version }}-pgpool2" 
-    state: present
-
-
+  apt: name={{ item }} state=present
+  with_items:
+    - pgpool2
+    - "postgresql-{{ psql_version }}-pgpool2" 
+    - iputils-arping
+    - apache2 
+    - php7.2 
+    - libapache2-mod-php7.2 
+    - php7.2-pgsql
 
 # Stop the postgresql and pgpool2 services
 - name: stop pgpool2 service
@@ -29,43 +33,235 @@
 - name: stop postgresql service
   service: name=postgresql state=stopped
 
-# Change pgpool configuration here
+- name: add pg_ctl to postgresql.conf
+  lineinfile: dest=/etc/postgresql/11/main/postgresql.conf insertafter="EOF" line="pgpool.pg_ctl = '/usr/lib/postgresql/11/bin/pg_ctl'"
 
-- name: change postgresql data directory value
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='^data_directory = \'.*\'' 
-           replace='data_directory = \'/home/postgres\''
-           backup=yes
+- name: change listen_addresses 
+  replace: 
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "listen_addresses = 'localhost'"
+    replace: "listen_addresses = '*'"
 
-- name: activate backend_hostname1 and set value
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='#backend_hostname1 = \'.*\'' 
-           replace='backend_hostname1 = \'10.168.33.20\''
-           backup=yes
+- name: set backend_hostname0
+  replace: 
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "backend_hostname0 = 'localhost'"
+    replace: "backend_hostname0 = {{ master_ip }}"
 
-- name: activate backend_port1 and set value
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='#backend_port1 = 5433' 
-           replace='backend_port1 = 5432'
-           backup=yes
+- name: set backend_port0
+  replace: 
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "backend_port0 = 5432"
+    replace: "backend_port0 = 5433"
 
-- name: activate backend_weight1 and set value
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='#backend_weight1 = 1' 
-           replace='backend_weight1 = 1'
-           backup=yes
+- name: set backend_data_directory
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "backend_data_directory0 = '/var/lib/pgsql/data'"
+    replace: "backend_data_directory0 = '/home/postgres/'"
 
-- name: activate backend_data_directory1 and set value
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='#backend_data_directory1 = \'.*\'' 
-           replace='backend_data_directory1 = \'/home/postgres\''
-           backup=yes
+- name: set backend_hostname1
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#backend_hostname1 = 'host2'"
+    replace: "backend_hostname1 = {{ slave_ip }}"
 
-- name: activate backend_flag1 and set value
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='#backend_flag1 = \'.*\'' 
-           replace='backend_flag1 = \'ALLOW_TO_FAILOVER\''
-           backup=yes
+- name: set backend_port1
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#backend_port1 = 5433"
+    replace: "backend_port1 = 5433"
+
+- name: set backend_weight1
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#backend_weight1 = 1"
+    replace: "backend_weight1 = 1"
+
+- name: set backend_data_directory1
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#backend_data_directory1 = '/data1'"
+    replace: "backend_data_directory1 = '/home/postgres/'"
+
+- name: set backend_flag1
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#backend_flag1 = 'ALLOW_TO_FAILOVER'"
+    replace: "backend_flag1 = 'ALLOW_TO_FAILOVER'"
+
+# optionally turn on load balancing
+#- name: turn on load balancing
+#  replace:
+#    dest: /etc/pgpool2/pgpool.conf
+#    regexp: "load_balance_mode = off"
+#    replace: "load_balance_mode = on"
+
+- name: turn on master/slave mode
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "master_slave_mode = off"
+    replace: "master_slave_mode = on"
+
+- name: set sr_check_period
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "sr_check_period = 0"
+    replace: "sr_check_period = 5"
+
+- name: set sr_check_user
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "sr_check_user = 'postgres'"
+    replace: ""
+
+- name: set health_check_period
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "health_check_period = 0"
+    replace: "health_check_period = 5"
+
+- name: set health check timeout
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "health_check_timeout = 20"
+    replace: "health_check_timeout = 0"
+
+- name: set health_check_user
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "health_check_user = 'nobody'"
+    replace: "health_check_user = 'postgres'"
+
+### NOTE PLAIN TEXT PASSWORD ###
+- name: set failover command
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "failover_command = ''"
+    replace: "failover_command = '/home/vagrant/git/istjenesten-ares-database/ansible/failover.sh %d %P %H postgres /etc/postgresql/11/main/im_the_master'"
+
+# Add recovery options?
+
+# Add trusted server?
+
+- name: turn watchdog on 
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "use_watchdog = off"
+    replace: "use_watchdog = on"
+
+- name: set wd hostname master
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "wd_hostname = ''"
+    replace: "wd_hostname = {{ master_ip }}"
+  when: is_master
+
+- name: set wd hostname slave
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "wd_hostname = ''"
+    replace: "wd_hostname = {{ slave_ip }}"
+  when: is_slave
+
+# skip this on slave
+- name: set wd priority
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "wd_priority = 1"
+    replace: "wd_priority = 2"
+  when: is_master
+
+- name: set watchdog socket dir
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "wd_ipc_socket_dir = '/tmp'"
+    replace: "wd_ipc_socket_dir = '/var/run/postgresql'"
+
+- name: set virtual ip
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "delegate_IP = ''"
+    replace: "delegate_IP = '10.168.33.99'"
+
+- name: set lifecheck interval
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "wd_interval = 10"
+    replace: "wd_interval = 3"
+
+##################
+# master specific
+
+- name: set heartbeat_destination0
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "heartbeat_destination0 = 'host0_ip1'"
+    replace: "heartbeat_destination0 = '{{ master_ip }}'"
+  when: is_master
+
+- name: set heartbeat_destination0
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "heartbeat_destination0 = 'host0_ip1'"
+    replace: "heartbeat_destination0 = '{{ slave_ip }}'"
+  when: is_slave
+
+- name: set other pgpool hostname
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#other_pgpool_hostname0 = 'host0'"
+    replace: "other_pgpool_hostname0 = '{{ slave_ip }}'"
+  when: is_master
+
+- name: set other pgpool hostname
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#other_pgpool_hostname0 = 'host0'"
+    replace: "other_pgpool_hostname0 = '{{ master_ip }}'"
+  when: is_slave
+
+- name: set other pgpool port
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#other_pgpool_port0 = 5432"
+    replace: "other_pgpool_port0 = 5432"
+
+- name: set other watchdog port
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "#other_wd_port0 = 9000"
+    replace: "other_wd_port0 = 9000"
+
+- name: change if cmd path
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "if_cmd_path = '/sbin'"
+    replace: "if_cmd_path = '/bin'"
+
+- name: change ip to ip_w (sudo wrapped command)
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "if_up_cmd = 'ip addr add $_IP_$/24 dev eth0 label eth0:0'"
+    replace: "if_up_cmd = 'ip_w addr add $_IP_$/32 dev eth0 label eth0:0'"
+
+- name: change ip to ip_w (sudo wrapped command) 2
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "if_down_cmd = 'ip addr del $_IP_$/24 dev eth0'"
+    replace: "if_down_cmd = 'ip_w addr del $_IP_$/32 dev eth0'"
+
+- name: change arping path
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "arping_path = '/usr/sbin'"
+    replace: "arping_path = '/usr/bin'"
+
+- name: change arping to arping_w
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "arping_cmd = 'arping -U $_IP_$ -w 1'"
+    replace: "arping_cmd = 'arping_w -U $_IP_$ -w 1'"
 
 - name: enable pool hba
   replace: dest=/etc/pgpool2/pgpool.conf
@@ -73,18 +269,6 @@
            replace='enable_pool_hba = on'
            backup=yes
 
-- name: enable replication mode
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='replication_mode = off' 
-           replace='replication_mode = on'
-           backup=yes
-
-- name: enable load balance mode
-  replace: dest=/etc/pgpool2/pgpool.conf
-           regexp='load_balance_mode = off' 
-           replace='load_balance_mode = on'
-           backup=yes
-           
 # Add AddGeometryColumn to black_function_list fopr load balancing
 # black_function_list = 'nextval,setval,nextval,setval,AddGeometryColumn'
 
@@ -145,8 +329,44 @@
   with_items:
     - /bin/sed --in-place '0,/trust/s/trust/dummy/;s/trust/md5/g;1,/dummy/s/dummy/trust/' pool_hba.conf
 
+- name: add hosts line to pool_hba.conf
+  lineinfile: 
+    dest: /etc/pgpool2/pool_hba.conf
+    insertafter: "EOF" 
+    line: "host    all         postgres    10.168.0.0/16         md5"
+
+
 # DO NOT adjust PostgreSQL pg_hba.conf
 # Change peer to md5
+
+# allow postgres and pgadmin to use sudo with ip and arping commands
+- name: add lines to /etc/sudoers
+  lineinfile:
+    dest: /etc/sudoers
+    line: '{{ item }}'
+    validate: 'visudo -cf %s'
+  with_items:
+    - 'postgres ALL=(root) NOPASSWD: /bin/ip'
+    - 'www-data ALL=(root) NOPASSWD: /bin/ip'
+    - 'postgres ALL=(root) NOPASSWD: /usr/bin/arping'
+    - 'www-data ALL=(root) NOPASSWD: /usr/bin/arping'
+
+- name: copy ip_w wrapper to /bin/
+  copy:
+    src: /home/vagrant/git/istjenesten-ares-database/ansible/roles/common/files/ip_w
+    dest: /bin/ip_w
+    owner: postgres
+    group: postgres
+    mode: '0755'
+
+- name: copy arping_w wrapper to /usr/bin/
+  copy:
+    src: /home/vagrant/git/istjenesten-ares-database/ansible/roles/common/files/arping_w
+    dest: /usr/bin/arping_w
+    owner: postgres
+    group: postgres
+    mode: '0755'
+
 
 # Restart the postgresql and pgpool2 services
 - name: start postgresql service
