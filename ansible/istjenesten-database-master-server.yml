@@ -22,20 +22,16 @@
   
   tasks:
 
-  - name: get postgresql version number (for Xenial)
-    set_fact:
-      psql_version_play: '9.5'
-    when: lubuntu_version == "xenial"
+  - name: load variables
+    include_vars: roles/common/vars/vars.yml
 
-  - name: get postgresql version number (for Bionic)
-    set_fact:
-      psql_version_play: '11'
-    when: lubuntu_version == "bionic"
+  - name: set facts
+    include: roles/common/tasks/set_facts.yml
 
   - name: update software
     include: roles/common/tasks/update-software.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
+#    vars:
+#      lubuntu_version: "{{ lubuntu_version }}"
 
   - name: install common packages
     include: roles/common/tasks/install-common-software.yml
@@ -70,15 +66,11 @@
     become: true
     become_user: postgres
     include: roles/common/tasks/adjust-postgresql-settings.yml
-    vars:
-      psql_version: "{{ psql_version_play }}"
 
   - name: setup as the master machine
     become: true
     become_user: postgres
     include: roles/master/tasks/master-specific-postgresql-setup.yml
-    vars:
-      psql_version: "{{ psql_version_play }}"
 
   - name: start postgresql service
     service: 
