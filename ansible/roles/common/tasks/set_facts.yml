@@ -30,6 +30,16 @@
     is_slave: false
   when: not im_the_slave.stat.exists
 
+- name: fail if neither master or slave
+  fail:
+    msg: "ERROR: I dont know if I should be master or slave. Either '{{ trigger_file }}' or '{{ standby_file }}' must be present."
+  when: is_master==false and is_slave==false
+
+- name: fail if both master or slave
+  fail:
+    msg: "ERROR: I dont know if I should be master or slave. Both '{{ trigger_file }}' and '{{ standby_file }}' cannot be present, delete one!"
+  when: is_master==true and is_slave==true
+
 - name: set postgres version
   set_fact:
     psql_version: 11
