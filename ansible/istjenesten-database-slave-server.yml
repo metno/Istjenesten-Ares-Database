@@ -22,25 +22,17 @@
   
   tasks:
 
-  - name: get postgresql version number (for Xenial)
-    set_fact:
-      psql_version_play: '9.5'
-    when: lubuntu_version == "xenial"
+  - name: load variables
+    include_vars: roles/common/vars/vars.yml
 
-  - name: get postgresql version number (for Bionic)
-    set_fact:
-      psql_version_play: '11'
-    when: lubuntu_version == "bionic"
+  - name: set facts
+    include: roles/common/tasks/set_facts.yml
 
   - name: update software
     include: roles/common/tasks/update-software.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
 
   - name: install common packages
     include: roles/common/tasks/install-common-software.yml  
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
 
   # Set postgres password!
   - name: set the postgres user password
@@ -70,19 +62,20 @@
     become: true
     become_user: postgres
     include: roles/common/tasks/adjust-postgresql-settings.yml 
-    vars:
-      psql_version: "{{ psql_version_play }}"
 
   - name: setup as a slave machine
     become: true
     become_user: postgres
     include: roles/slave/tasks/slave-specific-postgresql-setup.yml
-    vars:
-      psql_version: "{{ psql_version_play }}"
 
   # restart the PostgreSQL server
   - name: start postgresql service
     service: 
       name: postgresql 
       state: started
+
+
+  #setup pgpool
+  - name: setup pgpool
+    include: roles/common/tasks/pgpool-setup.yml
 

@@ -30,13 +30,9 @@
 
   - name: update software
     include: roles/common/tasks/update-software.yml
-#    vars:
-#      lubuntu_version: "{{ lubuntu_version }}"
 
   - name: install common packages
     include: roles/common/tasks/install-common-software.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
 
   # Set postgres password!
   - name: set the postgres user password
@@ -96,7 +92,5 @@
 
   - name: add bifrost admin user
     include: roles/common/tasks/add-bifrost-admin-user.yml
-    vars:
-      lubuntu_version: "{{ lubuntu_version }}"
 
  
