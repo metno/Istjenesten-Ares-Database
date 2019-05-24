@@ -14,7 +14,7 @@ NEW_PRIMARY=$3          # %H
 REPL_PASS=$4
 TRIGGER_FILE=$5
 
-echo "failover.sh FALLING_NODE: ${FALLING_NODE}; OLDPRIMARY_NODE: ${OLDPRIMARY_NODE}; NEW_PRIMARY: ${NEW_PRIMARY}; at $(date)\n" >> /etc/postgresql/9.5/main/replscripts/exec.log
+echo "failover.sh FALLING_NODE: ${FALLING_NODE}; OLDPRIMARY_NODE: ${OLDPRIMARY_NODE}; NEW_PRIMARY: ${NEW_PRIMARY}; at $(date)\n" >> /etc/postgresql/11/main/failover.log
 
 if [ $FALLING_NODE = $OLDPRIMARY_NODE ]; then
     if [ $UID -eq 0 ]
