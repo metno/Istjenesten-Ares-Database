@@ -24,7 +24,7 @@
     name: postgres
     encrypted: true 
     ########### temporary plain text password ########
-    password: postgres
+    password: md53175bce1d3201d16594cebf9d7eb3f9d
     login_user: postgres
     port: 5433
     db: postgres
