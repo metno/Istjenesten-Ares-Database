@@ -257,29 +257,33 @@
 ##############
 # NOTE enp0s8 is specific to the vm and will probably need to be changed
 #############
-- name: change ip to ip_w (sudo wrapped command)
+# Change network adapter
+- name: change adapte name 
   replace:
     dest: /etc/pgpool2/pgpool.conf
-    regexp: "if_up_cmd = 'ip addr add $_IP_$/24 dev eth0 label eth0:0'"
-    replace: "if_up_cmd = 'ip_w addr add $_IP_$/32 dev enp0s8 label enp0s8:0'"
+    regexp: "eth0"
+    ################
+    # NOTE: This is specific to the VM, probably needs changing!
+    # ##############
+    replace: "enp0s8"
 
 - name: change ip to ip_w (sudo wrapped command) 2
   replace:
     dest: /etc/pgpool2/pgpool.conf
-    regexp: "if_down_cmd = 'ip addr del $_IP_$/24 dev eth0'"
-    replace: "if_down_cmd = 'ip_w addr del $_IP_$/32 dev enp0s8'"
+    regexp: "ip addr"
+    replace: "ip_w addr"
+
+- name: change arping to arping_w
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "arping -U"
+    replace: "arping_w -U"
 
 - name: change arping path
   replace:
     dest: /etc/pgpool2/pgpool.conf
     regexp: "arping_path = '/usr/sbin'"
     replace: "arping_path = '/usr/bin'"
-
-- name: change arping to arping_w
-  replace:
-    dest: /etc/pgpool2/pgpool.conf
-    regexp: "arping_cmd = 'arping -U $_IP_$ -w 1'"
-    replace: "arping_cmd = 'arping_w -U $_IP_$ -w 1'"
 
 - name: enable pool hba
   replace: dest=/etc/pgpool2/pgpool.conf
