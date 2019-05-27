@@ -145,12 +145,6 @@
     regexp: "health_check_timeout = 20"
     replace: "health_check_timeout = 0"
 
-- name: set health_check_user
-  replace:
-    dest: /etc/pgpool2/pgpool.conf
-    regexp: "health_check_user = 'nobody'"
-    replace: "health_check_user = 'postgres'"
-
 ### NOTE PLAIN TEXT PASSWORD ###
 - name: set failover command
   replace:
@@ -212,14 +206,14 @@
   replace:
     dest: /etc/pgpool2/pgpool.conf
     regexp: "heartbeat_destination0 = 'host0_ip1'"
-    replace: "heartbeat_destination0 = '{{ master_ip }}'"
+    replace: "heartbeat_destination0 = '{{ slave_ip }}'"
   when: is_master
 
 - name: set heartbeat_destination0
   replace:
     dest: /etc/pgpool2/pgpool.conf
     regexp: "heartbeat_destination0 = 'host0_ip1'"
-    replace: "heartbeat_destination0 = '{{ slave_ip }}'"
+    replace: "heartbeat_destination0 = '{{ master_ip }}'"
   when: is_slave
 
 - name: set other pgpool hostname
@@ -290,6 +284,13 @@
            regexp='enable_pool_hba = off' 
            replace='enable_pool_hba = on'
            backup=yes
+
+- name: set user to postgres
+  replace:
+    dest: /etc/pgpool2/pgpool.conf
+    regexp: "nobody"
+    replace: "postgres"
+
 
 # Add AddGeometryColumn to black_function_list fopr load balancing
 # black_function_list = 'nextval,setval,nextval,setval,AddGeometryColumn'
